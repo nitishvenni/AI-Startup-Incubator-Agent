@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- ============================================================ -->
+<!-- Stats Row                                                     -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4">
+  <!-- Total Startups -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card glass p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="stat-label mb-1">Total Startups</p>
+          <h2 class="stat-value mb-0">{{ stats.total }}</h2>
+        </div>
+        <div class="stat-icon bg-primary-soft">
+          <i class="bi bi-rocket-takeoff-fill text-primary fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-3">
+        <small class="text-muted">All submitted projects</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyzed -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card glass p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="stat-label mb-1">Analyzed</p>
+          <h2 class="stat-value mb-0 text-success">{{ stats.analyzed }}</h2>
+        </div>
+        <div class="stat-icon bg-success-soft">
+          <i class="bi bi-check-circle-fill text-success fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-3">
+        <small class="text-muted">AI reports generated</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card glass p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="stat-label mb-1">Pending</p>
+          <h2 class="stat-value mb-0 text-warning">{{ stats.pending }}</h2>
+        </div>
+        <div class="stat-icon bg-warning-soft">
+          <i class="bi bi-hourglass-split text-warning fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-3">
+        <small class="text-muted">Awaiting analysis</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Industries -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card glass p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="stat-label mb-1">Industries</p>
+          <h2 class="stat-value mb-0 text-info">{{ stats.industries | length }}</h2>
+        </div>
+        <div class="stat-icon bg-info-soft">
+          <i class="bi bi-grid-1x2-fill text-info fs-4"></i>
+        </div>
+      </div>
+      <div class="mt-3">
+        <small class="text-muted">Sectors covered</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Charts Row                                                    -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-5">
+    <div class="card-glass glass p-4 h-100">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Industry Breakdown
+      </h6>
+      <div class="chart-container" style="position:relative;height:260px;">
+        <canvas id="industryChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card-glass glass p-4 h-100">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Project Status Overview
+      </h6>
+      <div class="chart-container" style="position:relative;height:260px;">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Recent Activity                                               -->
+<!-- ============================================================ -->
+<div class="row g-4">
+  <!-- Recent Startups -->
+  <div class="col-lg-6">
+    <div class="card-glass glass p-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="section-heading mb-0">
+          <i class="bi bi-clock-history me-2 text-primary"></i>Recent Startups
+        </h6>
+        <a href="{{ url_for('main.history') }}" class="btn btn-outline-primary btn-sm">View All</a>
+      </div>
+
+      {% if recent_startups %}
+        <div class="list-group list-group-flush">
+          {% for s in recent_startups %}
+          <a href="{{ url_for('startup.detail', project_id=s.id) }}"
+             class="list-group-item list-group-item-action glass-item d-flex align-items-center gap-3 py-3">
+            <div class="startup-icon-sm">
+              <i class="bi {{ s.icon }}"></i>
+            </div>
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-600 text-truncate">{{ s.startup_name }}</div>
+              <small class="text-muted">{{ s.industry }} &bull; {{ s.country }}</small>
+            </div>
+            <span class="badge badge-status-{{ s.status }}">{{ s.status | title }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state text-center py-4">
+          <i class="bi bi-rocket fs-1 text-muted"></i>
+          <p class="text-muted mt-2 mb-3">No startups yet.</p>
+          <a href="{{ url_for('startup.create') }}" class="btn btn-primary btn-sm">Create First Startup</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Reports -->
+  <div class="col-lg-6">
+    <div class="card-glass glass p-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="section-heading mb-0">
+          <i class="bi bi-file-earmark-bar-graph-fill me-2 text-primary"></i>Recent Reports
+        </h6>
+      </div>
+
+      {% if recent_reports %}
+        <div class="list-group list-group-flush">
+          {% for r in recent_reports %}
+          <div class="list-group-item glass-item py-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="fw-600 text-truncate me-3">{{ r.startup_name }}</div>
+              <span class="badge bg-{{ r.viability_color }}">{{ r.viability_score }}%</span>
+            </div>
+            <small class="text-muted">{{ r.industry }} &bull; {{ r.created_at_fmt }}</small>
+            <div class="score-mini-bars mt-2">
+              <div class="mini-bar" title="Viability">
+                <div class="mini-fill bg-primary" style="width:{{ r.viability_score }}%"></div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state text-center py-4">
+          <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+          <p class="text-muted mt-2 mb-0">No reports generated yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ---- Industry Doughnut Chart ----
+(function () {
+  const labels = {{ stats.industries | map(attribute='industry') | list | tojson }};
+  const data   = {{ stats.industries | map(attribute='count')    | list | tojson }};
+  const colors = ['#3b82d4','#7c5cd8','#10b981','#f59e0b','#ef4444','#6366f1'];
+
+  if (labels.length === 0) {
+    document.getElementById('industryChart').parentElement.innerHTML =
+      '<p class="text-muted text-center py-5">No data yet</p>';
+    return;
+  }
+  new Chart(document.getElementById('industryChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#1e2028' }],
+    },
+    options: {
+      plugins: { legend: { position: 'right', labels: { color: '#cdd6f4', padding: 14, font: { size: 12 } } } },
+      cutout: '65%',
+      maintainAspectRatio: false,
+    },
+  });
+}());
+
+// ---- Status Bar Chart ----
+(function () {
+  new Chart(document.getElementById('statusChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Analyzed', 'Pending', 'Total'],
+      datasets: [{
+        label: 'Projects',
+        data: [{{ stats.analyzed }}, {{ stats.pending }}, {{ stats.total }}],
+        backgroundColor: ['#10b981cc','#f59e0bcc','#3b82d4cc'],
+        borderRadius: 8,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { color: '#9ca3af', stepSize: 1 }, grid: { color: '#ffffff10' } },
+        x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+      },
+      maintainAspectRatio: false,
+    },
+  });
+}());
+</script>
+{% endblock %}

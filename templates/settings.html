@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-8 col-lg-9">
+
+    <!-- Status Banner -->
+    {% if configured %}
+    <div class="alert alert-success d-flex align-items-center gap-3 mb-4">
+      <i class="bi bi-check-circle-fill fs-4"></i>
+      <div>
+        <strong>IBM watsonx.ai is configured and ready.</strong>
+        All credentials loaded from environment variables.
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+      <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+      <div>
+        <strong>IBM credentials not fully configured.</strong>
+        Please set all required values in your <code>.env</code> file and restart the application.
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- IBM Configuration Status -->
+    <div class="card-glass glass p-4 mb-4">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-cpu-fill me-2 text-primary"></i>IBM watsonx.ai Credentials
+      </h6>
+
+      <div class="row g-3">
+        <!-- API Key -->
+        <div class="col-12">
+          <div class="cred-row d-flex align-items-center justify-content-between p-3 glass-item rounded">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-key-fill fs-5 text-warning"></i>
+              <div>
+                <div class="fw-600">IBM API Key</div>
+                <small class="text-muted">Used to authenticate with watsonx.ai</small>
+              </div>
+            </div>
+            <span class="badge {{ 'bg-success' if ibm_api_key_set else 'bg-danger' }}">
+              {{ '✓ Set' if ibm_api_key_set else '✗ Missing' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Project ID -->
+        <div class="col-12">
+          <div class="cred-row d-flex align-items-center justify-content-between p-3 glass-item rounded">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-folder-fill fs-5 text-info"></i>
+              <div>
+                <div class="fw-600">IBM Project ID</div>
+                <small class="text-muted">Your watsonx.ai project identifier</small>
+              </div>
+            </div>
+            <span class="badge {{ 'bg-success' if ibm_project_id_set else 'bg-danger' }}">
+              {{ '✓ Set' if ibm_project_id_set else '✗ Missing' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- URL -->
+        <div class="col-12">
+          <div class="cred-row d-flex align-items-center justify-content-between p-3 glass-item rounded">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-globe2 fs-5 text-primary"></i>
+              <div>
+                <div class="fw-600">IBM watsonx.ai URL</div>
+                <small class="text-muted">{{ ibm_url or 'Not set' }}</small>
+              </div>
+            </div>
+            <span class="badge {{ 'bg-success' if ibm_url else 'bg-danger' }}">
+              {{ '✓ Set' if ibm_url else '✗ Missing' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Model -->
+        <div class="col-12">
+          <div class="cred-row d-flex align-items-center justify-content-between p-3 glass-item rounded">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-braces fs-5 text-success"></i>
+              <div>
+                <div class="fw-600">Granite Model ID</div>
+                <small class="text-muted">{{ ibm_model or 'Not set' }}</small>
+              </div>
+            </div>
+            <span class="badge {{ 'bg-success' if ibm_model else 'bg-danger' }}">
+              {{ '✓ Set' if ibm_model else '✗ Missing' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Setup Instructions -->
+    <div class="card-glass glass p-4 mb-4">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-book-fill me-2 text-primary"></i>How to Configure
+      </h6>
+      <ol class="setup-steps">
+        <li class="mb-3">
+          <strong>Copy the example file</strong><br/>
+          <code class="glass-code">cp .env.example .env</code>
+        </li>
+        <li class="mb-3">
+          <strong>Get your IBM API Key</strong><br/>
+          Visit <a href="https://cloud.ibm.com/iam/apikeys" target="_blank" class="text-primary">cloud.ibm.com/iam/apikeys</a>
+          and create a new API key.
+        </li>
+        <li class="mb-3">
+          <strong>Get your watsonx.ai Project ID</strong><br/>
+          Open <a href="https://dataplatform.cloud.ibm.com/wx/home" target="_blank" class="text-primary">dataplatform.cloud.ibm.com</a>,
+          create or select a project, and copy the Project ID from the project settings.
+        </li>
+        <li class="mb-3">
+          <strong>Edit your .env file</strong><br/>
+          <pre class="glass-code p-3 rounded"><code>IBM_API_KEY=your_key_here
+IBM_PROJECT_ID=your_project_id_here
+IBM_URL=https://us-south.ml.cloud.ibm.com
+IBM_MODEL=ibm/granite-13b-instruct-v2</code></pre>
+        </li>
+        <li>
+          <strong>Restart the application</strong><br/>
+          <code class="glass-code">python app.py</code>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Available Models -->
+    <div class="card-glass glass p-4">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-lightning-charge-fill me-2 text-primary"></i>Recommended IBM Granite Models
+      </h6>
+      <div class="row g-3">
+        {% for model_id, model_name, model_desc in [
+          ('ibm/granite-13b-instruct-v2',  'Granite 13B Instruct v2',  'Best for detailed startup analysis and chat. Recommended.'),
+          ('ibm/granite-3-8b-instruct',     'Granite 3 8B Instruct',    'Faster, lighter model for quick responses.'),
+          ('ibm/granite-20b-multilingual',  'Granite 20B Multilingual', 'Best for non-English startup contexts.'),
+        ] %}
+        <div class="col-12">
+          <div class="glass-item p-3 rounded d-flex align-items-center justify-content-between">
+            <div>
+              <div class="fw-600">{{ model_name }}</div>
+              <small class="text-muted">{{ model_desc }}</small>
+            </div>
+            <code class="small text-info">{{ model_id }}</code>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

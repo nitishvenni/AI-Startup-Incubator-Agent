@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Startup{% endblock %}
+{% block page_title %}Create New Startup{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9 col-lg-10">
+
+    <!-- Header -->
+    <div class="page-header glass p-4 mb-4 d-flex align-items-center gap-3">
+      <div class="page-header-icon">
+        <i class="bi bi-plus-circle-fill fs-2 text-primary"></i>
+      </div>
+      <div>
+        <h4 class="fw-700 mb-1">Submit Your Startup Idea</h4>
+        <p class="text-muted mb-0 small">
+          Fill in the form below and IBM Granite will perform a full business analysis in real time.
+        </p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{ url_for('startup.create') }}" id="startupForm" novalidate>
+      <!-- ---------------------------------------------------- -->
+      <!-- Section 1: Basic Information                          -->
+      <!-- ---------------------------------------------------- -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">1</span> Basic Information
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="startup_name">Startup Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="startup_name" name="startup_name"
+                   placeholder="e.g. HealthBridge AI"
+                   value="{{ form_data.get('startup_name', '') }}" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="founder_name">Founder Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="founder_name" name="founder_name"
+                   placeholder="e.g. Jane Smith"
+                   value="{{ form_data.get('founder_name', '') }}" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="country">Country <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="country" name="country" required>
+              <option value="">Select your country…</option>
+              {% for c in countries %}
+              <option value="{{ c }}" {{ 'selected' if form_data.get('country') == c }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="industry">Industry <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="industry" name="industry" required>
+              <option value="">Select an industry…</option>
+              {% for ind in industries %}
+              <option value="{{ ind }}" {{ 'selected' if form_data.get('industry') == ind }}>{{ ind }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- Section 2: Business Details                           -->
+      <!-- ---------------------------------------------------- -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">2</span> Business Details
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="budget">Budget Range <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="budget" name="budget" required>
+              <option value="">Select your budget…</option>
+              {% for b in budgets %}
+              <option value="{{ b }}" {{ 'selected' if form_data.get('budget') == b }}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="target_audience">Target Audience <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="target_audience" name="target_audience"
+                   placeholder="e.g. Small business owners aged 30-50"
+                   value="{{ form_data.get('target_audience', '') }}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="business_goal">Business Goal <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="business_goal" name="business_goal"
+                   placeholder="e.g. Become the leading AI health monitoring platform in Southeast Asia by 2027"
+                   value="{{ form_data.get('business_goal', '') }}" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- Section 3: Idea Description                           -->
+      <!-- ---------------------------------------------------- -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">3</span> Idea Description
+        </h6>
+        <label class="form-label" for="idea_description">
+          Describe Your Startup Idea in Detail <span class="text-danger">*</span>
+        </label>
+        <textarea class="form-control glass-input" id="idea_description" name="idea_description"
+                  rows="6" placeholder="Explain your startup idea clearly. Include the problem you're solving, your proposed solution, unique value proposition, and how it works…" required>{{ form_data.get('idea_description', '') }}</textarea>
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted">Minimum 100 characters for better analysis results.</small>
+          <small class="text-muted" id="charCount">0 / 2000</small>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="d-flex gap-3 justify-content-end">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        <button type="submit" class="btn btn-primary px-5" id="submitBtn">
+          <i class="bi bi-cpu-fill me-2"></i>Analyze with IBM Granite
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Character counter
+const textarea = document.getElementById('idea_description');
+const counter  = document.getElementById('charCount');
+function updateCount() {
+  const len = textarea.value.length;
+  counter.textContent = len + ' / 2000';
+  counter.classList.toggle('text-warning', len > 1800);
+}
+textarea.addEventListener('input', updateCount);
+updateCount();
+
+// Show loading overlay on submit
+document.getElementById('startupForm').addEventListener('submit', function (e) {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing…';
+  document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('loadingText').textContent = 'IBM Granite is analyzing your startup…';
+});
+</script>
+{% endblock %}

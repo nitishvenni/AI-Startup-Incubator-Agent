@@ -1,0 +1,208 @@
+/* =============================================================
+   landing.css  –  Landing Page Specific Styles
+   ============================================================= */
+
+/* ─── Body override for landing ─────────────────────────────── */
+.landing-body {
+  background: radial-gradient(ellipse 80% 60% at 50% -10%,
+    rgba(59,130,212,0.18) 0%,
+    rgba(124,92,216,0.08) 40%,
+    transparent 70%),
+    #0a0d14;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Animated Particles ────────────────────────────────────── */
+.particles-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.particles-bg span {
+  position: absolute;
+  display: block;
+  width: 2px; height: 2px;
+  background: rgba(59,130,212,0.5);
+  border-radius: 50%;
+  animation: floatParticle 12s linear infinite;
+}
+.particles-bg span:nth-child(1) { left: 10%; animation-duration: 14s; animation-delay: 0s; width: 3px; height: 3px; }
+.particles-bg span:nth-child(2) { left: 25%; animation-duration: 18s; animation-delay: 2s; background: rgba(124,92,216,0.5); }
+.particles-bg span:nth-child(3) { left: 45%; animation-duration: 11s; animation-delay: 1s; }
+.particles-bg span:nth-child(4) { left: 65%; animation-duration: 16s; animation-delay: 3s; width: 3px; height: 3px; background: rgba(16,185,129,0.4); }
+.particles-bg span:nth-child(5) { left: 80%; animation-duration: 13s; animation-delay: 0.5s; }
+.particles-bg span:nth-child(6) { left: 90%; animation-duration: 20s; animation-delay: 1.5s; background: rgba(245,158,11,0.4); }
+.particles-bg span:nth-child(7) { left: 35%; animation-duration: 15s; animation-delay: 4s; width: 2px; height: 2px; }
+.particles-bg span:nth-child(8) { left: 55%; animation-duration: 17s; animation-delay: 2.5s; background: rgba(124,92,216,0.4); }
+
+@keyframes floatParticle {
+  0%   { top: 110%; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: -10%; opacity: 0; }
+}
+
+/* ─── Navigation ─────────────────────────────────────────────── */
+.landing-nav {
+  position: relative;
+  z-index: 10;
+  background: transparent;
+}
+.nav-brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #3b82d4, #7c5cd8);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+}
+.navbar-brand { color: #e2e8f0 !important; font-size: 1.05rem; }
+
+/* ─── Hero ───────────────────────────────────────────────────── */
+.hero-section {
+  position: relative;
+  z-index: 5;
+  padding: 5rem 1rem 4rem;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(59,130,212,0.12);
+  border: 1px solid rgba(59,130,212,0.3);
+  color: #7dd3fc;
+  border-radius: 50px;
+  padding: 0.35rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: #e2e8f0;
+  margin: 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, #3b82d4 0%, #7c5cd8 50%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #9ca3af;
+  max-width: 560px;
+  line-height: 1.75;
+  margin: 1rem auto 2rem;
+}
+
+/* Hero Buttons */
+.btn-hero-primary {
+  background: linear-gradient(135deg, #3b82d4, #7c5cd8);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  border-radius: 50px;
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 24px rgba(59,130,212,0.3);
+}
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(59,130,212,0.45);
+  color: #fff;
+}
+
+.btn-hero-outline {
+  background: transparent;
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+.btn-hero-outline:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ─── Features ───────────────────────────────────────────────── */
+.features-section {
+  position: relative; z-index: 5;
+}
+.features-section h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  color: #e2e8f0;
+  letter-spacing: -0.01em;
+}
+.feature-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  cursor: default;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59,130,212,0.25);
+}
+.feature-icon { line-height: 1; }
+
+/* ─── How It Works ───────────────────────────────────────────── */
+.how-section { position: relative; z-index: 5; }
+.how-section h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  color: #e2e8f0;
+  letter-spacing: -0.01em;
+}
+.step-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 1.25rem;
+  transition: transform 0.2s ease;
+}
+.step-card:hover { transform: translateY(-3px); }
+.step-number {
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #3b82d4, #7c5cd8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+/* ─── CTA Banner ─────────────────────────────────────────────── */
+.cta-section { position: relative; z-index: 5; }
+.cta-glass {
+  max-width: 640px;
+  background: rgba(59,130,212,0.07);
+  border: 1px solid rgba(59,130,212,0.2);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(20px);
+}
+.cta-glass h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  color: #e2e8f0;
+  letter-spacing: -0.01em;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.landing-footer {
+  position: relative; z-index: 5;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 1.5rem;
+}

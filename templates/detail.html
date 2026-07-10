@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{{ startup.startup_name }} – Analysis{% endblock %}
+{% block page_title %}Startup Analysis{% endblock %}
+
+{% block content %}
+<!-- ============================================================ -->
+<!-- Startup Header                                                -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="detail-header glass p-4">
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-4">
+          <div class="detail-icon">
+            <i class="bi {{ startup.icon }} fs-2"></i>
+          </div>
+          <div>
+            <h3 class="fw-700 mb-1">{{ startup.startup_name }}</h3>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="badge bg-primary-soft text-primary">{{ startup.industry }}</span>
+              <span class="badge bg-secondary-soft text-secondary">
+                <i class="bi bi-geo-alt-fill me-1"></i>{{ startup.country }}
+              </span>
+              <span class="badge badge-status-{{ startup.status }}">{{ startup.status | title }}</span>
+              <small class="text-muted ms-1"><i class="bi bi-calendar3 me-1"></i>{{ startup.created_at_fmt }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('chat.index', project_id=startup.id) }}" class="btn btn-outline-info btn-sm">
+            <i class="bi bi-chat-dots-fill me-1"></i>Chat About This
+          </a>
+          <form method="POST" action="{{ url_for('startup.reanalyze', project_id=startup.id) }}">
+            <button type="submit" class="btn btn-outline-primary btn-sm" onclick="showLoading('Re-analyzing with IBM Granite…')">
+              <i class="bi bi-arrow-clockwise me-1"></i>Re-Analyze
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('startup.delete', project_id=startup.id) }}"
+                onsubmit="return confirm('Delete this startup and all its data?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-trash3-fill me-1"></i>Delete
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Startup Meta Row -->
+      <div class="row g-3 mt-3">
+        <div class="col-sm-4 col-lg-2">
+          <div class="meta-item">
+            <small class="text-muted d-block">Founder</small>
+            <span class="fw-500">{{ startup.founder_name }}</span>
+          </div>
+        </div>
+        <div class="col-sm-4 col-lg-2">
+          <div class="meta-item">
+            <small class="text-muted d-block">Budget</small>
+            <span class="fw-500">{{ startup.budget }}</span>
+          </div>
+        </div>
+        <div class="col-sm-4 col-lg-4">
+          <div class="meta-item">
+            <small class="text-muted d-block">Target Audience</small>
+            <span class="fw-500">{{ startup.target_audience }}</span>
+          </div>
+        </div>
+        <div class="col-12 col-lg-4">
+          <div class="meta-item">
+            <small class="text-muted d-block">Business Goal</small>
+            <span class="fw-500">{{ startup.business_goal }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if report %}
+<!-- ============================================================ -->
+<!-- Score Cards                                                   -->
+<!-- ============================================================ -->
+<div class="row g-3 mb-4">
+  {% for score_key, label, icon in [
+    ('viability_score', 'Viability',  'bi-shield-check'),
+    ('market_score',    'Market Fit', 'bi-graph-up-arrow'),
+    ('innovation_score','Innovation', 'bi-lightbulb-fill'),
+    ('execution_score', 'Execution',  'bi-lightning-charge-fill'),
+  ] %}
+  {% set score = report[score_key] %}
+  {% set color = report[score_key[:-6] + '_color'] %}
+  <div class="col-sm-6 col-xl-3">
+    <div class="score-card glass p-4 text-center h-100">
+      <i class="bi {{ icon }} fs-3 text-{{ color }} mb-2 d-block"></i>
+      <div class="score-circle mx-auto mb-2"
+           style="--score:{{ score }};--color:var(--bs-{{ color }})">
+        <span class="score-number">{{ score }}</span>
+      </div>
+      <div class="fw-600">{{ label }}</div>
+      <small class="badge bg-{{ color }}-soft text-{{ color }}">{{ report[score_key[:-6] + '_label'] }}</small>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================ -->
+<!-- Score Radar Chart + Report                                    -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card-glass glass p-4 h-100">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-reception-4 me-2 text-primary"></i>Score Radar
+      </h6>
+      <div style="position:relative;height:280px;">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card-glass glass p-4 h-100">
+      <h6 class="section-heading mb-4">
+        <i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Full Analysis Report
+      </h6>
+      <div class="report-body" id="reportContent">
+        {{ report.content | safe }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- No report yet -->
+<div class="card-glass glass p-5 text-center">
+  <i class="bi bi-cpu fs-1 text-muted mb-3 d-block"></i>
+  <h5 class="fw-600 mb-2">No Analysis Report Yet</h5>
+  <p class="text-muted mb-4">Run the AI analysis to receive a full business report from IBM Granite.</p>
+  <form method="POST" action="{{ url_for('startup.reanalyze', project_id=startup.id) }}">
+    <button type="submit" class="btn btn-primary px-5" onclick="showLoading('IBM Granite is analyzing your startup…')">
+      <i class="bi bi-cpu-fill me-2"></i>Run AI Analysis
+    </button>
+  </form>
+</div>
+{% endif %}
+
+<!-- Idea Description -->
+<div class="card-glass glass p-4 mt-4">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-journal-text me-2 text-primary"></i>Original Idea Description
+  </h6>
+  <p class="text-muted mb-0" style="line-height:1.8">{{ startup.idea_description }}</p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% if report %}
+<script>
+// Render markdown-like content in the report body
+(function() {
+  const el = document.getElementById('reportContent');
+  let html = el.textContent;
+  // Convert ## headings
+  html = html.replace(/^## (.+)$/gm, '<h5 class="report-heading mt-4 mb-2">$1</h5>');
+  html = html.replace(/^### (.+)$/gm, '<h6 class="report-subheading mt-3 mb-1">$1</h6>');
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Bullets
+  html = html.replace(/^\s*[-*] (.+)$/gm, '<li class="mb-1">$1</li>');
+  html = html.replace(/(<li[^>]*>.*<\/li>)/gs, '<ul class="report-list">$1</ul>');
+  // Paragraphs
+  html = html.replace(/\n{2,}/g, '</p><p class="mb-2">');
+  el.innerHTML = '<p class="mb-2">' + html + '</p>';
+}());
+
+// Radar chart
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Viability','Market Fit','Innovation','Execution'],
+    datasets: [{
+      label: '{{ startup.startup_name | replace("'", "\\'") }}',
+      data: [
+        {{ report.viability_score }},
+        {{ report.market_score }},
+        {{ report.innovation_score }},
+        {{ report.execution_score }},
+      ],
+      borderColor: '#3b82d4',
+      backgroundColor: 'rgba(59,130,212,0.15)',
+      borderWidth: 2,
+      pointBackgroundColor: '#3b82d4',
+    }],
+  },
+  options: {
+    scales: {
+      r: {
+        min: 0, max: 100,
+        ticks: { stepSize: 25, color: '#6b7280', backdropColor: 'transparent' },
+        grid: { color: '#ffffff18' },
+        pointLabels: { color: '#cdd6f4', font: { size: 13 } },
+        angleLines: { color: '#ffffff18' },
+      },
+    },
+    plugins: { legend: { display: false } },
+    maintainAspectRatio: false,
+  },
+});
+
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg;
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+</script>
+{% endif %}
+{% endblock %}

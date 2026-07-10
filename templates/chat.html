@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}AI Mentor Chat{% endblock %}
+{% block page_title %}AI Mentor Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-layout { display:flex; gap:1.25rem; height:calc(100vh - 140px); min-height:500px; }
+.chat-sidebar-panel { width:260px; flex-shrink:0; }
+.chat-main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.messages-area { flex:1; overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:1rem; }
+.message-row { display:flex; gap:0.75rem; align-items:flex-end; }
+.message-row.user { flex-direction:row-reverse; }
+.bubble { max-width:72%; padding:0.75rem 1rem; border-radius:1.25rem; line-height:1.65; font-size:0.9rem; word-break:break-word; }
+.bubble-user { background:linear-gradient(135deg,#3b82d4,#7c5cd8); color:#fff; border-bottom-right-radius:0.25rem; }
+.bubble-ai { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#e2e8f0; border-bottom-left-radius:0.25rem; }
+.avatar-sm { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.85rem; }
+.avatar-user { background:linear-gradient(135deg,#3b82d4,#7c5cd8); }
+.avatar-ai { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); }
+.chat-input-bar { padding:1rem 1.25rem; border-top:1px solid rgba(255,255,255,0.07); }
+.typing-indicator span { display:inline-block;width:7px;height:7px;background:#7c5cd8;border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay:0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-layout">
+
+  <!-- ============================================================ -->
+  <!-- Left Panel: Context Selector                                 -->
+  <!-- ============================================================ -->
+  <div class="chat-sidebar-panel">
+    <div class="glass p-3 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-collection-fill me-2 text-primary"></i>Context
+      </h6>
+
+      <!-- Project selector -->
+      <label class="form-label small text-muted mb-1">Select Startup (optional)</label>
+      <select class="form-select glass-input form-select-sm mb-3" id="projectSelector">
+        <option value="">— General Chat —</option>
+        {% for s in all_startups %}
+        <option value="{{ s.id }}" {{ 'selected' if selected_startup and selected_startup.id == s.id }}>
+          {{ s.startup_name }}
+        </option>
+        {% endfor %}
+      </select>
+
+      {% if selected_startup %}
+      <!-- Active project card -->
+      <div class="glass-item p-3 rounded mb-3">
+        <small class="text-muted d-block mb-1">Active Project</small>
+        <div class="fw-600 mb-1">{{ selected_startup.startup_name }}</div>
+        <span class="tag-pill small">{{ selected_startup.industry }}</span>
+      </div>
+      {% endif %}
+
+      <!-- Starter prompts -->
+      <div class="mt-auto">
+        <small class="text-muted d-block mb-2">Quick Prompts</small>
+        {% for prompt in [
+          'What is my biggest risk?',
+          'Suggest a go-to-market strategy.',
+          'How should I price my product?',
+          'Who are my main competitors?',
+          'What funding options suit me?',
+        ] %}
+        <button class="btn btn-outline-secondary btn-sm w-100 text-start mb-2 quick-prompt"
+                data-prompt="{{ prompt }}">
+          <i class="bi bi-lightning-fill me-1 text-warning"></i>{{ prompt }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Chat Main                                                     -->
+  <!-- ============================================================ -->
+  <div class="chat-main glass">
+
+    <!-- Messages -->
+    <div class="messages-area" id="messagesArea">
+
+      <!-- Welcome message -->
+      {% if not messages %}
+      <div class="message-row">
+        <div class="avatar-sm avatar-ai"><i class="bi bi-cpu-fill text-primary"></i></div>
+        <div class="bubble bubble-ai">
+          <strong>Hello! I'm your AI Startup Mentor</strong> powered by IBM Granite.<br/>
+          {% if selected_startup %}
+          I see you're working on <strong>{{ selected_startup.startup_name }}</strong> in the
+          <strong>{{ selected_startup.industry }}</strong> space. Ask me anything about your startup!
+          {% else %}
+          Tell me about your startup idea, and I'll provide expert guidance on strategy,
+          market fit, funding, and more. Select a project from the sidebar for contextual answers.
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Historical messages -->
+      {% for msg in messages %}
+      <div class="message-row {{ 'user' if msg.role == 'user' else '' }}">
+        {% if msg.role == 'user' %}
+          <div class="avatar-sm avatar-user"><i class="bi bi-person-fill"></i></div>
+          <div class="bubble bubble-user">{{ msg.content }}</div>
+        {% else %}
+          <div class="avatar-sm avatar-ai"><i class="bi bi-cpu-fill text-primary"></i></div>
+          <div class="bubble bubble-ai">{{ msg.content }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <!-- Typing indicator (hidden by default) -->
+      <div class="message-row d-none" id="typingIndicator">
+        <div class="avatar-sm avatar-ai"><i class="bi bi-cpu-fill text-primary"></i></div>
+        <div class="bubble bubble-ai typing-indicator py-2 px-3">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chat-input-bar">
+      <div class="d-flex gap-2">
+        <textarea class="form-control glass-input" id="chatInput" rows="1"
+                  placeholder="Ask your AI startup mentor anything…"
+                  style="resize:none;max-height:120px;overflow-y:auto"></textarea>
+        <button class="btn btn-primary px-3" id="sendBtn" title="Send (Enter)">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
+      <small class="text-muted mt-1 d-block">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</small>
+    </div>
+
+  </div><!-- /.chat-main -->
+</div><!-- /.chat-layout -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const messagesArea    = document.getElementById('messagesArea');
+  const chatInput       = document.getElementById('chatInput');
+  const sendBtn         = document.getElementById('sendBtn');
+  const projectSelector = document.getElementById('projectSelector');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  // Scroll to bottom helper
+  function scrollBottom() {
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+  scrollBottom();
+
+  // Auto-grow textarea
+  chatInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Project switcher – reload page with new project context
+  projectSelector.addEventListener('change', function () {
+    const pid = this.value;
+    const url = '{{ url_for("chat.index") }}' + (pid ? '?project_id=' + pid : '');
+    window.location.href = url;
+  });
+
+  // Quick prompt buttons
+  document.querySelectorAll('.quick-prompt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      chatInput.value = this.dataset.prompt;
+      chatInput.dispatchEvent(new Event('input'));
+      chatInput.focus();
+    });
+  });
+
+  // Append a message bubble
+  function appendMessage(role, text) {
+    const row  = document.createElement('div');
+    const isUser = role === 'user';
+    row.className = 'message-row' + (isUser ? ' user' : '');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar-sm ' + (isUser ? 'avatar-user' : 'avatar-ai');
+    avatar.innerHTML = isUser ? '<i class="bi bi-person-fill"></i>' : '<i class="bi bi-cpu-fill text-primary"></i>';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + (isUser ? 'bubble-user' : 'bubble-ai');
+    // Simple markdown: bold, newlines
+    bubble.innerHTML = text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br/>');
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    typingIndicator.parentNode.insertBefore(row, typingIndicator);
+    scrollBottom();
+  }
+
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    appendMessage('user', text);
+
+    // Show typing indicator
+    typingIndicator.classList.remove('d-none');
+    scrollBottom();
+
+    try {
+      const res = await fetch('{{ url_for("api.chat_send") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          project_id: projectSelector.value ? parseInt(projectSelector.value) : null,
+        }),
+      });
+      const data = await res.json();
+      typingIndicator.classList.add('d-none');
+
+      if (res.ok && data.reply) {
+        appendMessage('assistant', data.reply);
+      } else {
+        appendMessage('assistant', '⚠️ ' + (data.error || 'Sorry, something went wrong. Please try again.'));
+      }
+    } catch (err) {
+      typingIndicator.classList.add('d-none');
+      appendMessage('assistant', '⚠️ Network error. Please check your connection.');
+    } finally {
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+}());
+</script>
+{% endblock %}
