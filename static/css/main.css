@@ -565,3 +565,653 @@ kbd {
   border: 1px solid rgba(255,255,255,0.15);
   font-size: 0.8em;
 }
+
+
+/* =============================================================
+   MENTOR MODULE  –  AI Startup Incubation Report
+   ============================================================= */
+
+/* ─── Mentor Button ─────────────────────────────────────────── */
+.btn-mentor {
+  background: linear-gradient(135deg, #7c5cd8 0%, #3b82d4 100%);
+  color: #fff !important;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: opacity var(--transition), box-shadow var(--transition);
+}
+.btn-mentor:hover { opacity: 0.88; box-shadow: 0 0 0 3px rgba(124,92,216,0.25); }
+
+/* ─── Mentor Form Header ────────────────────────────────────── */
+.mentor-form-header { border-left: 4px solid var(--secondary); }
+.mentor-header-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: var(--secondary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+.mentor-section-badge {
+  background: var(--secondary-soft);
+  color: var(--secondary);
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid rgba(124,92,216,0.25);
+  border-radius: 100px;
+  padding: 2px 10px;
+}
+
+/* ─── Sticky Section TOC ────────────────────────────────────── */
+.report-toc-strip {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  top: calc(var(--topbar-h) + 8px);
+  z-index: 40;
+  padding: 0.5rem 1rem;
+}
+.toc-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+}
+.toc-link {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 6px;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.toc-link:hover,
+.toc-link.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* ─── Section Group Label ───────────────────────────────────── */
+.report-group-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-left: 3px solid var(--secondary);
+  padding: 0.3rem 0.6rem;
+  margin-bottom: 0.75rem;
+  background: var(--secondary-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ─── Report Hero ───────────────────────────────────────────── */
+.report-hero { border-left: 4px solid var(--primary); }
+.report-title-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.report-meta-overflow {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.mentor-hero-icon {
+  width: 60px; height: 60px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.mentor-ibm-badge {
+  display: inline-flex; align-items: center;
+  background: rgba(59,130,212,0.12);
+  color: var(--primary);
+  border: 1px solid rgba(59,130,212,0.3);
+  border-radius: 100px;
+  font-size: 0.7rem; font-weight: 600;
+  padding: 2px 10px;
+}
+
+/* ─── Typography helpers ────────────────────────────────────── */
+.ls-wide { letter-spacing: 0.06em; }
+.prose-phase-heading {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  border-left: 3px solid var(--primary);
+  padding-left: 0.6rem;
+}
+.prose-week-heading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--info);
+}
+.prose-num {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ─── Validation Score Ring ─────────────────────────────────── */
+.validation-score-ring {
+  position: relative;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  /* Use --vs-hex (exact hex) instead of Bootstrap --bs- tokens */
+  background: conic-gradient(
+    var(--vs-hex, #3b82d4) calc(var(--vs, 72) * 1%),
+    rgba(255,255,255,0.07) 0%
+  );
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.validation-score-ring::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+}
+.vs-number {
+  position: relative; z-index: 1;
+  font-size: 2.4rem; font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.vs-label-text {
+  position: relative; z-index: 1;
+  font-size: 0.7rem; color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Section Heading ───────────────────────────────────────── */
+.section-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Report Prose ──────────────────────────────────────────── */
+/* IMPORTANT: no white-space:pre-wrap — that causes horizontal overflow.
+   Use overflow-wrap + word-break instead.                         */
+.report-prose,
+.pitch-content,
+.mentor-advice-body {
+  font-size: 0.9rem;
+  line-height: 1.78;
+  color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;                /* prevents flex overflow */
+}
+.report-prose p,
+.pitch-content p,
+.mentor-advice-body p { margin-bottom: 0.55rem; }
+.report-list { padding-left: 1.3rem; margin: 0.5rem 0; }
+.report-list li { margin-bottom: 0.35rem; font-size: 0.875rem; line-height: 1.65; }
+
+/* ─── Mentor Meta Pill ──────────────────────────────────────── */
+.mentor-meta-pill {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.85rem;
+  overflow: hidden;           /* clip long text */
+}
+.mentor-meta-pill .min-w-0 {
+  overflow: hidden;
+}
+.mentor-meta-pill span.small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Competitor Table ──────────────────────────────────────── */
+.mentor-table {
+  font-size: 0.85rem;
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--glass-border);
+  --bs-table-hover-bg: rgba(255,255,255,0.04);
+  table-layout: fixed;
+  width: 100%;
+}
+.mentor-table thead th {
+  font-size: 0.71rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom-color: var(--glass-border);
+  background: rgba(255,255,255,0.02);
+  padding: 0.6rem 0.75rem;
+}
+.mentor-table td { padding: 0.6rem 0.75rem; vertical-align: top; }
+/* prevent table cells from blowing out their container */
+.comp-cell {
+  display: block;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ─── SWOT Cards ────────────────────────────────────────────── */
+.swot-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  min-height: 160px;
+}
+.swot-card-header {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+}
+.swot-list {
+  list-style: none;
+  padding: 0; margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.68;
+}
+.swot-list li {
+  padding: 0.25rem 0;
+  padding-left: 1.1rem;
+  position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.swot-list li::before {
+  content: '›';
+  position: absolute; left: 0; top: 0.25rem;
+  font-weight: 700; font-size: 1rem; line-height: 1.2;
+}
+.swot-strengths     { background: rgba(16,185,129,0.07);  border-color: rgba(16,185,129,0.3)  !important; }
+.swot-weaknesses    { background: rgba(239,68,68,0.07);   border-color: rgba(239,68,68,0.3)   !important; }
+.swot-opportunities { background: rgba(59,130,212,0.07);  border-color: rgba(59,130,212,0.3)  !important; }
+.swot-threats       { background: rgba(245,158,11,0.07);  border-color: rgba(245,158,11,0.3)  !important; }
+
+.swot-strengths     .swot-card-header { color: var(--success); }
+.swot-weaknesses    .swot-card-header { color: var(--danger); }
+.swot-opportunities .swot-card-header { color: var(--primary); }
+.swot-threats       .swot-card-header { color: var(--warning); }
+
+.swot-strengths     .swot-list li::before { color: var(--success); }
+.swot-weaknesses    .swot-list li::before { color: var(--danger); }
+.swot-opportunities .swot-list li::before { color: var(--primary); }
+.swot-threats       .swot-list li::before { color: var(--warning); }
+
+/* ─── Business Model Canvas  (proper CSS Grid) ───────────────── */
+/*
+  5-column grid, 3 rows.  Named template areas map exactly to the
+  standard BMC layout:
+      KP | KA | VP | CR | CS
+      KP | KR | VP | CH | CS
+     COST COST | REV  REV  REV
+*/
+.bmc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr 1fr auto;
+  grid-template-areas:
+    "kp ka  vp cr cs"
+    "kp kr  vp ch cs"
+    "cost cost rev rev rev";
+  gap: 5px;
+  min-height: 320px;
+}
+.bmc-area-kp   { grid-area: kp; }
+.bmc-area-ka   { grid-area: ka; }
+.bmc-area-vp   { grid-area: vp; }
+.bmc-area-cr   { grid-area: cr; }
+.bmc-area-cs   { grid-area: cs; }
+.bmc-area-kr   { grid-area: kr; }
+.bmc-area-ch   { grid-area: ch; }
+.bmc-area-cost { grid-area: cost; }
+.bmc-area-rev  { grid-area: rev; }
+
+.bmc-cell {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.bmc-cell-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.bmc-cell-body {
+  font-size: 0.8rem;
+  line-height: 1.62;
+  color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  flex-grow: 1;
+}
+
+/* Colour-coded top border per BMC block */
+.bmc-key-partners         { border-top: 2px solid #7c5cd8; }
+.bmc-key-activities       { border-top: 2px solid #3b82d4; }
+.bmc-key-resources        { border-top: 2px solid #06b6d4; }
+.bmc-value-prop           { border-top: 2px solid #f59e0b; background: rgba(245,158,11,0.04) !important; }
+.bmc-customer-relationships { border-top: 2px solid #10b981; }
+.bmc-channels             { border-top: 2px solid #ef4444; }
+.bmc-customer-segments    { border-top: 2px solid #3b82d4; }
+.bmc-cost-structure       { border-top: 2px solid #6b7280; }
+.bmc-revenue-streams      { border-top: 2px solid #10b981; background: rgba(16,185,129,0.04) !important; }
+
+/* Responsive: collapse BMC to 2 columns then 1 column */
+@media (max-width: 900px) {
+  .bmc-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      "vp   vp"
+      "kp   cs"
+      "ka   cr"
+      "kr   ch"
+      "cost rev";
+    min-height: unset;
+  }
+}
+@media (max-width: 560px) {
+  .bmc-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "vp" "kp" "cs" "ka" "cr" "kr" "ch" "cost" "rev";
+  }
+}
+
+/* ─── Investor Pitch Card ────────────────────────────────────── */
+.investor-pitch-card {
+  border: 1px solid rgba(59,130,212,0.3);
+  background: rgba(59,130,212,0.05) !important;
+}
+.pitch-content {
+  font-size: 1rem;
+  line-height: 1.88;
+  font-style: italic;
+  border-left: 3px solid var(--primary);
+  padding-left: 1.1rem;
+}
+
+/* ─── Mentor Advice Card ─────────────────────────────────────── */
+.mentor-advice-card {
+  border: 1px solid rgba(124,92,216,0.3);
+  background: rgba(124,92,216,0.05) !important;
+}
+.mentor-advice-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.mentor-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--secondary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+/* ─── Mentor History Card ────────────────────────────────────── */
+.mentor-history-card {
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.mentor-history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+.mentor-history-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--secondary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--secondary);
+  flex-shrink: 0;
+  font-size: 1.15rem;
+}
+
+/* ─── Colour utilities ───────────────────────────────────────── */
+.bg-success-soft   { background: var(--success-soft)   !important; }
+.bg-info-soft      { background: var(--info-soft)      !important; }
+.bg-warning-soft   { background: var(--warning-soft)   !important; }
+.bg-danger-soft    { background: var(--danger-soft)    !important; }
+.bg-primary-soft   { background: var(--primary-soft)   !important; }
+.bg-secondary-soft { background: var(--secondary-soft) !important; }
+.text-success   { color: var(--success)   !important; }
+.text-info      { color: var(--info)      !important; }
+.text-warning   { color: var(--warning)   !important; }
+.text-danger    { color: var(--danger)    !important; }
+.text-primary   { color: var(--primary)   !important; }
+.text-secondary { color: var(--secondary) !important; }
+
+/* ============================================================
+   New additions for production-ready features
+   ============================================================ */
+
+/* Global Search */
+.topbar-search { flex: 1; max-width: 380px; }
+.search-wrap { width: 100%; }
+.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none; z-index:2; }
+.search-input { padding-left:36px !important; border-radius:var(--radius) !important; }
+.search-results { position:absolute; top:calc(100% + 6px); left:0; right:0; border-radius:var(--radius); z-index:1000; display:none; max-height:320px; overflow-y:auto; border:1px solid rgba(255,255,255,0.1); }
+.search-results.visible { display:block; }
+.search-result-item { color:var(--text-primary); border-bottom:1px solid rgba(255,255,255,0.07); transition:background var(--transition); border-radius: 0; }
+.search-result-item:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.search-result-item:last-child { border-bottom:none; border-radius: 0 0 var(--radius) var(--radius); }
+.search-result-item:hover { background:var(--glass-hover); color:var(--text-primary); }
+
+/* Activity Feed */
+.activity-feed { max-height:340px; overflow-y:auto; }
+.activity-item { border-bottom:1px solid rgba(255,255,255,0.06); }
+.activity-item:last-child { border-bottom:none; }
+.activity-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:5px; background:var(--primary); }
+
+/* Activity page */
+.activity-icon-badge { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+/* Profile page */
+.color-swatch { display:block; width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform 0.15s, border-color 0.15s; }
+.color-swatch-radio:checked + .color-swatch { border-color:#fff; transform:scale(1.15); }
+.color-swatch:hover { transform:scale(1.1); }
+
+/* Milestone styles */
+.milestone-item { border:1px solid rgba(255,255,255,0.07); transition:background var(--transition); }
+.milestone-done { opacity:0.7; }
+.milestone-active { border-left:3px solid var(--warning) !important; }
+
+/* Hover lift effect */
+.hover-lift { transition:transform var(--transition), box-shadow var(--transition); }
+.hover-lift:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+
+/* Export buttons */
+.btn-export { font-size:0.78rem; padding:0.3rem 0.75rem; }
+
+/* Toast overrides */
+.toast { min-width:280px; }
+
+/* Mobile improvements */
+@media (max-width: 575.98px) {
+  .page-content { padding: 0.75rem !important; }
+  .stat-card { padding: 1rem !important; }
+  .card-glass { padding: 1rem !important; }
+  .topbar { padding: 0 0.75rem; }
+  .topbar-title { display:none !important; }
+}
+
+@media (max-width: 767.98px) {
+  .detail-header .d-flex.gap-4 { gap:1rem !important; }
+  .hero-title { font-size: clamp(2rem, 8vw, 3.5rem); }
+}
+
+/* Error pages */
+.error-page { min-height:100vh; display:flex; align-items:center; justify-content:center; }
+
+/* Table improvements */
+.mentor-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+/* Score circle animation */
+@keyframes scaleIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+.score-card { animation: scaleIn 0.4s ease forwards; }
+.score-card:nth-child(2) { animation-delay:0.08s; }
+.score-card:nth-child(3) { animation-delay:0.16s; }
+.score-card:nth-child(4) { animation-delay:0.24s; }
+
+/* Page fade-in */
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.page-content { animation: fadeUp 0.35s ease; }
+
+/* Loading progress bar at top */
+.nProgress { display:none; }
+
+/* ─── Workspace Header ───────────────────────────────────────── */
+.workspace-header {
+  padding: 1.25rem 1.5rem 0;
+}
+.workspace-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+.workspace-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.workspace-title {
+  font-size: 1.45rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ─── Workspace Toolbar ──────────────────────────────────────── */
+.workspace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.workspace-action-btn {
+  white-space: nowrap;
+}
+
+/* ─── Workspace Meta Row ─────────────────────────────────────── */
+.workspace-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 0.85rem 0 0.75rem;
+}
+.workspace-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 100px;
+}
+.workspace-meta-goal { flex: 1 1 200px; }
+.workspace-meta-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+.workspace-meta-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ─── Workspace Status Cards ─────────────────────────────────── */
+.workspace-status-card {
+  border-radius: var(--radius);
+}
+.workspace-status-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+.workspace-status-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+/* ─── Workspace Section Label ────────────────────────────────── */
+.workspace-section-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-left: 3px solid var(--primary);
+  padding: 0.3rem 0.6rem;
+  background: var(--primary-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  display: inline-flex;
+  width: 100%;
+}
+
+/* ─── Workspace Empty State ──────────────────────────────────── */
+.workspace-empty-state {
+  border: 2px dashed var(--glass-border);
+  background: rgba(59,130,212,0.03) !important;
+}
+.empty-state-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary);
+  margin: 0 auto;
+}

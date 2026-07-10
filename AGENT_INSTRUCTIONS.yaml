@@ -1,0 +1,70 @@
+# ============================================================
+# AGENT_INSTRUCTIONS.yaml
+# AI Startup Incubator Agent — Mentor Personality Config
+# ============================================================
+# Edit this file to customise the AI mentor's behaviour.
+# Changes take effect on the next report/chat generation
+# (no restart required — file is read at request time).
+# ============================================================
+
+# ── Mentor Personality ──────────────────────────────────────
+# Options: "encouraging", "direct", "socratic", "analytical", "visionary"
+mentor_personality: "encouraging"
+
+# ── Business Tone ───────────────────────────────────────────
+# Options: "professional", "casual", "academic", "startup-friendly", "investor-grade"
+business_tone: "professional"
+
+# ── Creativity Level (1 = conservative, 10 = highly creative) ──
+creativity: 7
+
+# ── Industry Focus ──────────────────────────────────────────
+# Leave empty ("") to be industry-agnostic, or specify e.g. "Technology"
+industry_focus: ""
+
+# ── Default Country Context ─────────────────────────────────
+# Used when no country is specified; influences regulatory/funding advice
+default_country: "United States"
+
+# ── Funding Focus ───────────────────────────────────────────
+# Options: "bootstrapping", "angel", "vc", "grants", "mixed"
+funding_focus: "mixed"
+
+# ── Writing Style ───────────────────────────────────────────
+# Options: "concise", "detailed", "bullet-heavy", "narrative", "structured"
+writing_style: "structured"
+
+# ── Response Language ───────────────────────────────────────
+# ISO 639-1 code. Keep "en" for English.
+language: "en"
+
+# ── Mentor Name ─────────────────────────────────────────────
+# Display name shown in reports and chat
+mentor_name: "Granite Mentor"
+
+# ── Sections to Include in Full Reports ─────────────────────
+# Set to false to skip a section and speed up generation
+sections:
+  executive_summary: true
+  problem_analysis: true
+  solution: true
+  customer_personas: true
+  market_research: true
+  competitor_analysis: true
+  swot_analysis: true
+  business_model_canvas: true
+  revenue_model: true
+  pricing_strategy: true
+  estimated_budget: true
+  funding_suggestions: true
+  government_schemes: true
+  legal_checklist: true
+  technology_recommendation: true
+  development_roadmap: true
+  weekly_timeline: true
+  marketing_strategy: true
+  customer_acquisition_plan: true
+  investor_pitch: true
+  risk_analysis: true
+  success_metrics: true
+  mentor_advice: true

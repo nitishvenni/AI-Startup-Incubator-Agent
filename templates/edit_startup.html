@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ startup.startup_name }}{% endblock %}
+{% block page_title %}Edit Startup{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9 col-lg-10">
+
+    <div class="page-header glass p-4 mb-4 d-flex align-items-center gap-3">
+      <div class="page-header-icon">
+        <i class="bi bi-pencil-fill fs-2 text-warning"></i>
+      </div>
+      <div>
+        <h4 class="fw-700 mb-1">Edit Startup: {{ startup.startup_name }}</h4>
+        <p class="text-muted mb-0 small">
+          Update your startup details. Re-analyze to generate a fresh AI report after saving.
+        </p>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('startup.edit', project_id=startup.id) }}" id="editForm" novalidate>
+      <!-- Section 1: Basic Information -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">1</span> Basic Information
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="startup_name">Startup Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="startup_name" name="startup_name"
+                   value="{{ form_data.get('startup_name', startup.startup_name) }}" required maxlength="200" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="founder_name">Founder Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="founder_name" name="founder_name"
+                   value="{{ form_data.get('founder_name', startup.founder_name) }}" required maxlength="200" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="country">Country <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="country" name="country" required>
+              <option value="">Select your country…</option>
+              {% for c in countries %}
+              <option value="{{ c }}" {{ 'selected' if form_data.get('country', startup.country) == c }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="industry">Industry <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="industry" name="industry" required>
+              <option value="">Select an industry…</option>
+              {% for ind in industries %}
+              <option value="{{ ind }}" {{ 'selected' if form_data.get('industry', startup.industry) == ind }}>{{ ind }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Business Details -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">2</span> Business Details
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="budget">Budget Range <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="budget" name="budget" required>
+              <option value="">Select your budget…</option>
+              {% for b in budgets %}
+              <option value="{{ b }}" {{ 'selected' if form_data.get('budget', startup.budget) == b }}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="target_audience">Target Audience <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="target_audience" name="target_audience"
+                   value="{{ form_data.get('target_audience', startup.target_audience) }}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="business_goal">Business Goal <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="business_goal" name="business_goal"
+                   value="{{ form_data.get('business_goal', startup.business_goal) }}" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Idea Description -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">3</span> Idea Description
+        </h6>
+        <label class="form-label" for="idea_description">
+          Describe Your Startup Idea in Detail <span class="text-danger">*</span>
+        </label>
+        <textarea class="form-control glass-input" id="idea_description" name="idea_description"
+                  rows="6" required>{{ form_data.get('idea_description', startup.idea_description) }}</textarea>
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted">Minimum 50 characters.</small>
+          <small class="text-muted" id="charCount">0 / 5000</small>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 justify-content-end">
+        <a href="{{ url_for('startup.detail', project_id=startup.id) }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        <button type="submit" class="btn btn-warning px-5" id="submitBtn">
+          <i class="bi bi-check-lg me-2"></i>Save Changes
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const textarea = document.getElementById('idea_description');
+const counter  = document.getElementById('charCount');
+function updateCount() {
+  const len = textarea.value.length;
+  counter.textContent = len + ' / 5000';
+  counter.classList.toggle('text-warning', len > 4500);
+}
+textarea.addEventListener('input', updateCount);
+updateCount();
+
+document.getElementById('editForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving…';
+});
+</script>
+{% endblock %}

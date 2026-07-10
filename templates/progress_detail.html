@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ startup.startup_name }} – Progress{% endblock %}
+{% block page_title %}Progress Tracker{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="detail-header glass p-4 mb-4">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-4">
+      <div class="detail-icon">
+        <i class="bi {{ startup.icon }} fs-2"></i>
+      </div>
+      <div>
+        <h3 class="fw-700 mb-1">{{ startup.startup_name }}</h3>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge bg-primary-soft text-primary">{{ startup.industry }}</span>
+          <span class="badge badge-status-{{ startup.status }}">{{ startup.status | title }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('startup.detail', project_id=startup.id) }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-file-earmark-text me-1"></i>View Report
+      </a>
+    </div>
+  </div>
+
+  <!-- Progress summary -->
+  <div class="row g-3 mt-3">
+    {% for label, val, color in [
+      ('Total', progress.total, 'primary'),
+      ('Completed', progress.completed, 'success'),
+      ('In Progress', progress.in_progress, 'warning'),
+      ('Pending', progress.pending, 'secondary'),
+    ] %}
+    <div class="col-6 col-lg-3">
+      <div class="text-center">
+        <div class="fw-700 fs-5 text-{{ color }}">{{ val }}</div>
+        <small class="text-muted">{{ label }}</small>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="col-12 mt-2">
+      <div class="d-flex justify-content-between mb-1">
+        <small class="text-muted">Overall Progress</small>
+        <small class="fw-600">{{ progress.pct }}%</small>
+      </div>
+      <div class="progress score-progress">
+        <div class="progress-bar bg-success" style="width:{{ progress.pct }}%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Add Milestone Form                                            -->
+<!-- ============================================================ -->
+<div class="card-glass glass p-4 mb-4">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-plus-circle-fill me-2 text-primary"></i>Add Milestone
+  </h6>
+  <form method="POST" action="{{ url_for('progress.add', project_id=startup.id) }}">
+    <div class="row g-3">
+      <div class="col-md-5">
+        <input type="text" class="form-control glass-input" name="title" placeholder="Milestone title *" required maxlength="200" />
+      </div>
+      <div class="col-md-4">
+        <input type="text" class="form-control glass-input" name="description" placeholder="Description (optional)" />
+      </div>
+      <div class="col-md-2">
+        <input type="date" class="form-control glass-input" name="due_date" />
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ============================================================ -->
+<!-- Milestones List                                               -->
+<!-- ============================================================ -->
+{% if milestones %}
+<div class="card-glass glass p-4">
+  <h6 class="section-heading mb-4">
+    <i class="bi bi-list-check me-2 text-primary"></i>Milestones ({{ milestones | length }})
+  </h6>
+  <div class="milestone-list">
+    {% for m in milestones %}
+    <div class="milestone-item d-flex align-items-center gap-3 p-3 mb-2 glass-item rounded
+         {% if m.status == 'completed' %}milestone-done{% elif m.status == 'in_progress' %}milestone-active{% endif %}">
+
+      <!-- Status icon -->
+      <div class="milestone-icon flex-shrink-0">
+        {% if m.status == 'completed' %}
+        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+        {% elif m.status == 'in_progress' %}
+        <i class="bi bi-arrow-right-circle-fill text-warning fs-5"></i>
+        {% else %}
+        <i class="bi bi-circle text-muted fs-5"></i>
+        {% endif %}
+      </div>
+
+      <!-- Content -->
+      <div class="flex-grow-1 min-w-0">
+        <div class="fw-600 {% if m.status == 'completed' %}text-muted text-decoration-line-through{% endif %}">
+          {{ m.title }}
+        </div>
+        {% if m.description %}
+        <small class="text-muted">{{ m.description }}</small>
+        {% endif %}
+        <div class="d-flex gap-2 mt-1">
+          {% if m.due_date %}
+          <span class="tag-pill small"><i class="bi bi-calendar3 me-1"></i>{{ m.due_date }}</span>
+          {% endif %}
+          <span class="tag-pill small">Added {{ m.created_at_fmt }}</span>
+        </div>
+      </div>
+
+      <!-- Status Change Form -->
+      <div class="d-flex gap-2 flex-shrink-0">
+        {% if m.status != 'in_progress' %}
+        <form method="POST" action="{{ url_for('progress.set_status', milestone_id=m.id) }}">
+          <input type="hidden" name="status" value="in_progress" />
+          <input type="hidden" name="project_id" value="{{ startup.id }}" />
+          <button type="submit" class="btn btn-outline-warning btn-sm" title="Mark In Progress">
+            <i class="bi bi-arrow-right-circle"></i>
+          </button>
+        </form>
+        {% endif %}
+        {% if m.status != 'completed' %}
+        <form method="POST" action="{{ url_for('progress.set_status', milestone_id=m.id) }}">
+          <input type="hidden" name="status" value="completed" />
+          <input type="hidden" name="project_id" value="{{ startup.id }}" />
+          <button type="submit" class="btn btn-outline-success btn-sm" title="Mark Complete">
+            <i class="bi bi-check-lg"></i>
+          </button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('progress.remove', milestone_id=m.id) }}"
+              onsubmit="return confirm('Remove this milestone?');">
+          <input type="hidden" name="project_id" value="{{ startup.id }}" />
+          <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="card-glass glass p-5 text-center">
+  <i class="bi bi-list-check fs-1 text-muted mb-3 d-block"></i>
+  <h5 class="fw-600 mb-2">No Milestones Yet</h5>
+  <p class="text-muted mb-0">Add your first milestone above to start tracking progress.</p>
+</div>
+{% endif %}
+{% endblock %}

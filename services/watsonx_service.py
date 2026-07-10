@@ -12,12 +12,22 @@ from ibm_watsonx_ai.foundation_models import ModelInference
 from ibm_watsonx_ai.metanames import GenTextParamsMetaNames as GenParams
 
 
+print("[TRACE] MODULE LOAD services.watsonx_service __file__ =", __file__)
+
+
 def _build_client(app) -> ModelInference:
     """Construct an authenticated ModelInference client."""
+    print("[TRACE] ENTER services.watsonx_service._build_client(app)")
+    print("[TRACE] _build_client IBM_URL =", repr(app.config["IBM_URL"]))
+    print("[TRACE] _build_client IBM_MODEL =", repr(app.config["IBM_MODEL"]))
+    print("[TRACE] _build_client IBM_PROJECT_ID =", repr(app.config["IBM_PROJECT_ID"]))
+    print("[TRACE] _build_client IBM_API_KEY length =", len(app.config["IBM_API_KEY"] or ""))
+
     credentials = Credentials(
         url=app.config["IBM_URL"],
         api_key=app.config["IBM_API_KEY"],
     )
+
     params = {
         GenParams.MAX_NEW_TOKENS: app.config["WX_MAX_NEW_TOKENS"],
         GenParams.MIN_NEW_TOKENS: app.config["WX_MIN_NEW_TOKENS"],
@@ -26,30 +36,69 @@ def _build_client(app) -> ModelInference:
         GenParams.TOP_K: app.config["WX_TOP_K"],
         GenParams.REPETITION_PENALTY: app.config["WX_REPETITION_PENALTY"],
     }
-    return ModelInference(
+    print("[TRACE] DIVERGENCE CHECK hehe.py ModelInference has no constructor params")
+    print("[TRACE] Flask ModelInference params =", repr(params))
+    print("[TRACE] CALL ModelInference(")
+    print("[TRACE]   model_id =", repr(app.config["IBM_MODEL"]))
+    print("[TRACE]   credentials.url =", repr(app.config["IBM_URL"]))
+    print("[TRACE]   credentials.api_key length =", len(app.config["IBM_API_KEY"] or ""))
+    print("[TRACE]   project_id =", repr(app.config["IBM_PROJECT_ID"]))
+    print("[TRACE]   params =", repr(params))
+    print("[TRACE] )")
+
+    client = ModelInference(
         model_id=app.config["IBM_MODEL"],
         credentials=credentials,
         project_id=app.config["IBM_PROJECT_ID"],
         params=params,
     )
+    print("[TRACE] EXIT services.watsonx_service._build_client(app)")
+    return client
 
 
-def generate_text(app, prompt: str) -> str:
+def generate_text(app, prompt: str, max_new_tokens: int = 512) -> str:
     """
-    Send *prompt* to Granite and return the generated text string.
-    Raises RuntimeError on any SDK or network failure.
+    Send prompt to watsonx.ai and print detailed debugging information.
     """
+    print("[TRACE] ENTER services.watsonx_service.generate_text(app, prompt, max_new_tokens)")
+    print("[TRACE] services.watsonx_service __file__ =", __file__)
+    print("[TRACE] generate_text prompt length =", len(prompt))
+    print("[TRACE] generate_text prompt preview =", repr(prompt[:500]))
+    print("[TRACE] generate_text max_new_tokens =", repr(max_new_tokens))
+    print("[TRACE] generate_text app.config IBM_MODEL =", repr(app.config.get("IBM_MODEL")))
+    print("[TRACE] generate_text app.config IBM_URL =", repr(app.config.get("IBM_URL")))
+    print("[TRACE] generate_text app.config IBM_PROJECT_ID =", repr(app.config.get("IBM_PROJECT_ID")))
+    print("[TRACE] generate_text app.config IBM_API_KEY length =", len(app.config.get("IBM_API_KEY") or ""))
+
     if not app.config.get("IBM_API_KEY") or not app.config.get("IBM_PROJECT_ID"):
         raise RuntimeError(
             "IBM credentials are not configured. "
             "Please set IBM_API_KEY and IBM_PROJECT_ID in your .env file."
         )
-    try:
-        client = _build_client(app)
-        response = client.generate_text(prompt=prompt)
-        return response.strip() if isinstance(response, str) else str(response)
-    except Exception as exc:
-        raise RuntimeError(f"watsonx.ai generation failed: {exc}") from exc
+
+    client = _build_client(app)
+
+    call_params = {"max_new_tokens": max_new_tokens}
+    print("[TRACE] DIVERGENCE CHECK hehe.py generate_text params = {'max_new_tokens': 20}")
+    print("[TRACE] Flask client.generate_text params =", repr(call_params))
+    print("[TRACE] CALL client.generate_text(prompt=prompt, params=call_params)")
+
+    response = client.generate_text(
+        prompt=prompt,
+        params=call_params,
+    )
+
+    print("[TRACE] EXIT client.generate_text")
+    print("[TRACE] RAW RESPONSE type =", type(response).__name__)
+    print("[TRACE] RAW RESPONSE repr =", repr(response))
+
+    if isinstance(response, str):
+        result = response.strip()
+    else:
+        result = str(response)
+
+    print("[TRACE] EXIT services.watsonx_service.generate_text(app, prompt)")
+    return result
 
 
 def analyze_startup(app, startup_data: dict) -> dict:
@@ -63,9 +112,15 @@ def analyze_startup(app, startup_data: dict) -> dict:
         innovation_score - int 0-100
         execution_score  - int 0-100
     """
+    print("[TRACE] ENTER services.watsonx_service.analyze_startup(app, startup_data)")
+    print("[TRACE] analyze_startup startup_data =", repr(startup_data))
     prompt = _build_analysis_prompt(startup_data)
+    print("[TRACE] analyze_startup built prompt length =", len(prompt))
     raw = generate_text(app, prompt)
-    return _parse_analysis(raw)
+    print("[TRACE] analyze_startup raw response length =", len(raw))
+    parsed = _parse_analysis(raw)
+    print("[TRACE] EXIT services.watsonx_service.analyze_startup(app, startup_data)")
+    return parsed
 
 
 def chat_with_mentor(app, user_message: str, context: dict | None = None) -> str:

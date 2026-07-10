@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report.startup_name }} – Incubation Report{% endblock %}
+{% block page_title %}Incubation Report{% endblock %}
+
+{% set s = report.sections %}
+
+{% block content %}
+
+<!-- ============================================================ -->
+<!-- Sticky Section TOC                                            -->
+<!-- ============================================================ -->
+<div class="report-toc-strip mb-4" id="reportToc">
+  <div class="toc-inner">
+    {% for label, anchor in [
+      ('Score',       'sec-score'),
+      ('Summary',     'sec-summary'),
+      ('Problem',     'sec-problem'),
+      ('Personas',    'sec-personas'),
+      ('Market',      'sec-market'),
+      ('Competitors', 'sec-competitors'),
+      ('SWOT',        'sec-swot'),
+      ('BMC',         'sec-bmc'),
+      ('Revenue',     'sec-revenue'),
+      ('Budget',      'sec-budget'),
+      ('Legal',       'sec-legal'),
+      ('Tech',        'sec-tech'),
+      ('Roadmap',     'sec-roadmap'),
+      ('Marketing',   'sec-marketing'),
+      ('Pitch',       'sec-pitch'),
+      ('Risks',       'sec-risks'),
+      ('Metrics',     'sec-metrics'),
+      ('Mentor',      'sec-mentor'),
+    ] %}
+    <a href="#{{ anchor }}" class="toc-link">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Report Header                                                 -->
+<!-- ============================================================ -->
+<div class="report-hero glass p-4 mb-4">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3 min-w-0">
+      <div class="mentor-hero-icon flex-shrink-0">
+        <i class="bi {{ report.icon }} fs-2"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+          <span class="mentor-ibm-badge"><i class="bi bi-cpu-fill me-1"></i>IBM Granite</span>
+          <span class="badge bg-secondary-soft text-secondary">Incubation Report</span>
+        </div>
+        <h3 class="fw-700 mb-1 report-title-truncate">{{ report.startup_name }}</h3>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <span class="badge bg-primary-soft text-primary">{{ report.industry }}</span>
+          <span class="badge bg-secondary-soft text-secondary">
+            <i class="bi bi-geo-alt-fill me-1"></i>{{ report.country }}
+          </span>
+          <span class="badge bg-info-soft text-info">
+            <i class="bi bi-wallet2 me-1"></i>{{ report.budget }}
+          </span>
+          <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ report.created_at_fmt }}</small>
+        </div>
+        <div class="mt-2">
+          <small class="text-muted report-meta-overflow">
+            <i class="bi bi-person-fill me-1"></i>{{ report.founder_name }}
+            &nbsp;·&nbsp;
+            <i class="bi bi-people-fill me-1"></i>{{ report.target_audience }}
+          </small>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
+      {% if report.project_id %}
+      <a href="{{ url_for('startup.detail', project_id=report.project_id) }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Workspace
+      </a>
+      {% else %}
+      <a href="{{ url_for('mentor.index') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-stars me-1"></i>New Report
+      </a>
+      {% endif %}
+      <!-- Export Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-download me-1"></i>Export
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end glass">
+          <li>
+            <a class="dropdown-item" href="{{ url_for('mentor.export_pdf', report_id=report.id) }}">
+              <i class="bi bi-file-pdf-fill me-2 text-danger"></i>Export as PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('mentor.export_docx', report_id=report.id) }}">
+              <i class="bi bi-file-word-fill me-2 text-primary"></i>Export as DOCX
+            </a>
+          </li>
+        </ul>
+      </div>
+      <form method="POST" action="{{ url_for('mentor.delete_report', report_id=report.id) }}"
+            onsubmit="return confirm('Delete this incubation report permanently?');">
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+          <i class="bi bi-trash3-fill me-1"></i>Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Startup Validation Score                                      -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4" id="sec-score">
+  <div class="col-lg-4">
+    <div class="glass p-4 h-100 text-center d-flex flex-column align-items-center justify-content-center">
+      <div class="mb-2">
+        <i class="bi bi-patch-check-fill fs-3 text-primary"></i>
+      </div>
+      <h6 class="fw-600 text-muted mb-3 text-uppercase ls-wide">Startup Validation Score</h6>
+      {% set vs = report.validation_score %}
+      {% if vs >= 80 %}{% set vs_color = "success" %}{% set vs_hex = "#10b981" %}{% set vs_label = "Excellent" %}
+      {% elif vs >= 65 %}{% set vs_color = "info" %}{% set vs_hex = "#06b6d4" %}{% set vs_label = "Good" %}
+      {% elif vs >= 50 %}{% set vs_color = "warning" %}{% set vs_hex = "#f59e0b" %}{% set vs_label = "Fair" %}
+      {% else %}{% set vs_color = "danger" %}{% set vs_hex = "#ef4444" %}{% set vs_label = "Needs Work" %}{% endif %}
+      <div class="validation-score-ring mx-auto" style="--vs:{{ vs }};--vs-hex:{{ vs_hex }}">
+        <span class="vs-number">{{ vs }}</span>
+        <span class="vs-label-text">/100</span>
+      </div>
+      <span class="badge bg-{{ vs_color }}-soft text-{{ vs_color }} mt-3 px-3 py-2" style="font-size:0.85rem">{{ vs_label }}</span>
+      <p class="text-muted small mt-2 mb-0">Overall startup viability score</p>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="col-lg-8" id="sec-summary">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Executive Summary
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.EXECUTIVE_SUMMARY or 'No summary generated.' }}</div>
+      <div class="row g-3 mt-auto pt-3">
+        <div class="col-sm-6">
+          <div class="mentor-meta-pill">
+            <i class="bi bi-bullseye me-2 text-primary flex-shrink-0"></i>
+            <div class="min-w-0"><small class="text-muted d-block">Business Goal</small><span class="fw-500 small">{{ report.business_goal }}</span></div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="mentor-meta-pill">
+            <i class="bi bi-people-fill me-2 text-info flex-shrink-0"></i>
+            <div class="min-w-0"><small class="text-muted d-block">Target Audience</small><span class="fw-500 small">{{ report.target_audience }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Problem Analysis & Solution                                   -->
+<!-- ============================================================ -->
+<div class="report-group-label"><i class="bi bi-search me-2"></i>Problem &amp; Solution</div>
+<div class="row g-4 mb-4" id="sec-problem">
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Problem Analysis
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.PROBLEM_ANALYSIS or '—' }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-lightbulb-fill me-2 text-success"></i>Solution
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.SOLUTION or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Customer Personas                                             -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-personas">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-person-badge-fill me-2 text-info"></i>Customer Personas
+  </h6>
+  <div class="report-prose">{{ s.CUSTOMER_PERSONAS or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Market Research                                               -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-market">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Market Research
+  </h6>
+  <div class="report-prose">{{ s.MARKET_RESEARCH or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Competitor Analysis — Responsive Table                        -->
+<!-- ============================================================ -->
+<div class="report-group-label"><i class="bi bi-bar-chart-steps me-2"></i>Competitive Landscape</div>
+<div class="glass p-4 mb-4" id="sec-competitors">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-trophy-fill me-2 text-warning"></i>Competitor Analysis
+  </h6>
+  {% if s._competitor_rows and s._competitor_rows | length > 0 and s._competitor_rows[0].name %}
+  <div class="table-responsive">
+    <table class="table mentor-table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width:20%">Competitor</th>
+          <th style="width:27%">Strengths</th>
+          <th style="width:27%">Weaknesses</th>
+          <th style="width:26%">Our Advantage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in s._competitor_rows %}
+        {% if row.name %}
+        <tr>
+          <td><span class="fw-600 text-primary comp-cell">{{ row.name }}</span></td>
+          <td><span class="text-muted small comp-cell">{{ row.strengths }}</span></td>
+          <td><span class="text-muted small comp-cell">{{ row.weaknesses }}</span></td>
+          <td><span class="text-success small fw-500 comp-cell">{{ row.advantage }}</span></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="report-prose">{{ s.COMPETITOR_ANALYSIS or '—' }}</div>
+  {% endif %}
+</div>
+
+<!-- ============================================================ -->
+<!-- SWOT Analysis — Four Cards                                    -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-swot">
+  <h6 class="section-heading mb-4">
+    <i class="bi bi-grid-3x3-gap-fill me-2 text-secondary"></i>SWOT Analysis
+  </h6>
+  {% set swot = s._swot %}
+  <div class="row g-3">
+    <div class="col-sm-6 col-xl-3">
+      <div class="swot-card swot-strengths h-100 p-4">
+        <div class="swot-card-header">
+          <i class="bi bi-shield-fill-check me-2"></i>Strengths
+        </div>
+        <ul class="swot-list mt-3">
+          {% for item in swot.strengths %}
+          <li>{{ item }}</li>
+          {% else %}
+          <li class="text-muted fst-italic">No data</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="swot-card swot-weaknesses h-100 p-4">
+        <div class="swot-card-header">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Weaknesses
+        </div>
+        <ul class="swot-list mt-3">
+          {% for item in swot.weaknesses %}
+          <li>{{ item }}</li>
+          {% else %}
+          <li class="text-muted fst-italic">No data</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="swot-card swot-opportunities h-100 p-4">
+        <div class="swot-card-header">
+          <i class="bi bi-arrow-up-circle-fill me-2"></i>Opportunities
+        </div>
+        <ul class="swot-list mt-3">
+          {% for item in swot.opportunities %}
+          <li>{{ item }}</li>
+          {% else %}
+          <li class="text-muted fst-italic">No data</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="swot-card swot-threats h-100 p-4">
+        <div class="swot-card-header">
+          <i class="bi bi-lightning-fill me-2"></i>Threats
+        </div>
+        <ul class="swot-list mt-3">
+          {% for item in swot.threats %}
+          <li>{{ item }}</li>
+          {% else %}
+          <li class="text-muted fst-italic">No data</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% if not (swot.strengths or swot.weaknesses or swot.opportunities or swot.threats) %}
+  <div class="report-prose mt-3">{{ s.SWOT_ANALYSIS or '—' }}</div>
+  {% endif %}
+</div>
+
+<!-- ============================================================ -->
+<!-- Business Model Canvas — CSS Grid Dashboard                   -->
+<!-- ============================================================ -->
+<div class="report-group-label"><i class="bi bi-diagram-3-fill me-2"></i>Business Model</div>
+<div class="glass p-4 mb-4" id="sec-bmc">
+  <h6 class="section-heading mb-4">
+    <i class="bi bi-diagram-3-fill me-2 text-primary"></i>Business Model Canvas
+  </h6>
+  {% set bmc = s._bmc %}
+  <div class="bmc-grid">
+    <!-- Key Partners — col 1, rows 1-2 -->
+    <div class="bmc-cell bmc-key-partners bmc-area-kp">
+      <div class="bmc-cell-title"><i class="bi bi-people-fill me-1"></i>Key Partners</div>
+      <div class="bmc-cell-body">{{ bmc.key_partners or '—' }}</div>
+    </div>
+    <!-- Key Activities — col 2, row 1 -->
+    <div class="bmc-cell bmc-key-activities bmc-area-ka">
+      <div class="bmc-cell-title"><i class="bi bi-gear-fill me-1"></i>Key Activities</div>
+      <div class="bmc-cell-body">{{ bmc.key_activities or '—' }}</div>
+    </div>
+    <!-- Value Propositions — col 3, rows 1-2 (centre, highlighted) -->
+    <div class="bmc-cell bmc-value-prop bmc-area-vp">
+      <div class="bmc-cell-title"><i class="bi bi-star-fill me-1"></i>Value Propositions</div>
+      <div class="bmc-cell-body">{{ bmc.value_propositions or '—' }}</div>
+    </div>
+    <!-- Customer Relationships — col 4, row 1 -->
+    <div class="bmc-cell bmc-customer-relationships bmc-area-cr">
+      <div class="bmc-cell-title"><i class="bi bi-heart-fill me-1"></i>Customer Relationships</div>
+      <div class="bmc-cell-body">{{ bmc.customer_relationships or '—' }}</div>
+    </div>
+    <!-- Customer Segments — col 5, rows 1-2 -->
+    <div class="bmc-cell bmc-customer-segments bmc-area-cs">
+      <div class="bmc-cell-title"><i class="bi bi-person-lines-fill me-1"></i>Customer Segments</div>
+      <div class="bmc-cell-body">{{ bmc.customer_segments or '—' }}</div>
+    </div>
+    <!-- Key Resources — col 2, row 2 -->
+    <div class="bmc-cell bmc-key-resources bmc-area-kr">
+      <div class="bmc-cell-title"><i class="bi bi-archive-fill me-1"></i>Key Resources</div>
+      <div class="bmc-cell-body">{{ bmc.key_resources or '—' }}</div>
+    </div>
+    <!-- Channels — col 4, row 2 -->
+    <div class="bmc-cell bmc-channels bmc-area-ch">
+      <div class="bmc-cell-title"><i class="bi bi-broadcast me-1"></i>Channels</div>
+      <div class="bmc-cell-body">{{ bmc.channels or '—' }}</div>
+    </div>
+    <!-- Cost Structure — col 1-2-3, row 3 -->
+    <div class="bmc-cell bmc-cost-structure bmc-area-cost">
+      <div class="bmc-cell-title"><i class="bi bi-cash-coin me-1"></i>Cost Structure</div>
+      <div class="bmc-cell-body">{{ bmc.cost_structure or '—' }}</div>
+    </div>
+    <!-- Revenue Streams — col 3-4-5, row 3 -->
+    <div class="bmc-cell bmc-revenue-streams bmc-area-rev">
+      <div class="bmc-cell-title"><i class="bi bi-graph-up me-1"></i>Revenue Streams</div>
+      <div class="bmc-cell-body">{{ bmc.revenue_streams or '—' }}</div>
+    </div>
+  </div>
+  {% if not (bmc.key_partners or bmc.value_propositions or bmc.customer_segments) %}
+  <div class="report-prose mt-3">{{ s.BUSINESS_MODEL_CANVAS or '—' }}</div>
+  {% endif %}
+</div>
+
+<!-- ============================================================ -->
+<!-- Revenue Model & Pricing Strategy                             -->
+<!-- ============================================================ -->
+<div class="report-group-label" id="sec-revenue"><i class="bi bi-currency-dollar me-2"></i>Financials &amp; Funding</div>
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-currency-dollar me-2 text-success"></i>Revenue Model
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.REVENUE_MODEL or '—' }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-tags-fill me-2 text-info"></i>Pricing Strategy
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.PRICING_STRATEGY or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Estimated Budget & Funding Suggestions                       -->
+<!-- ============================================================ -->
+<div class="row g-4 mb-4" id="sec-budget">
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-wallet2 me-2 text-warning"></i>Estimated Budget
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.ESTIMATED_BUDGET or '—' }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-bank2 me-2 text-primary"></i>Funding Suggestions
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.FUNDING_SUGGESTIONS or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Government Schemes & Legal Checklist                         -->
+<!-- ============================================================ -->
+<div class="report-group-label" id="sec-legal"><i class="bi bi-building-fill-check me-2"></i>Compliance &amp; Support</div>
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-building-fill-check me-2 text-success"></i>Government Schemes
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.GOVERNMENT_SCHEMES or '—' }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-check2-square me-2 text-info"></i>Legal Checklist
+      </h6>
+      <div class="report-prose checklist-prose flex-grow-1">{{ s.LEGAL_CHECKLIST or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Technology Recommendation                                     -->
+<!-- ============================================================ -->
+<div class="report-group-label" id="sec-tech"><i class="bi bi-cpu-fill me-2"></i>Execution Plan</div>
+<div class="glass p-4 mb-4">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-cpu-fill me-2 text-primary"></i>Technology Recommendation
+  </h6>
+  <div class="report-prose">{{ s.TECHNOLOGY_RECOMMENDATION or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Development Roadmap                                           -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-roadmap">
+  <h6 class="section-heading mb-4">
+    <i class="bi bi-map-fill me-2 text-secondary"></i>Development Roadmap
+  </h6>
+  <div class="report-prose roadmap-prose">{{ s.DEVELOPMENT_ROADMAP or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Weekly Timeline                                               -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-calendar-week-fill me-2 text-info"></i>Weekly Timeline (First Month)
+  </h6>
+  <div class="report-prose">{{ s.WEEKLY_TIMELINE or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Marketing Strategy & Customer Acquisition Plan               -->
+<!-- ============================================================ -->
+<div class="report-group-label" id="sec-marketing"><i class="bi bi-megaphone-fill me-2"></i>Go-To-Market</div>
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-megaphone-fill me-2 text-warning"></i>Marketing Strategy
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.MARKETING_STRATEGY or '—' }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-funnel-fill me-2 text-success"></i>Customer Acquisition Plan
+      </h6>
+      <div class="report-prose flex-grow-1">{{ s.CUSTOMER_ACQUISITION_PLAN or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Investor Pitch                                                -->
+<!-- ============================================================ -->
+<div class="report-group-label" id="sec-pitch"><i class="bi bi-briefcase-fill me-2"></i>Investor &amp; Risk</div>
+<div class="glass p-4 mb-4 investor-pitch-card">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-briefcase-fill me-2 text-primary"></i>Investor Pitch
+  </h6>
+  <div class="pitch-content">{{ s.INVESTOR_PITCH or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Risk Analysis                                                 -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-risks">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-shield-exclamation me-2 text-danger"></i>Risk Analysis
+  </h6>
+  <div class="report-prose">{{ s.RISK_ANALYSIS or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Success Metrics                                               -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-4" id="sec-metrics">
+  <h6 class="section-heading mb-3">
+    <i class="bi bi-bar-chart-fill me-2 text-success"></i>Success Metrics &amp; KPIs
+  </h6>
+  <div class="report-prose">{{ s.SUCCESS_METRICS or '—' }}</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Personalized Mentor Advice                                    -->
+<!-- ============================================================ -->
+<div class="glass p-4 mb-5 mentor-advice-card" id="sec-mentor">
+  <div class="mentor-advice-header">
+    <div class="mentor-avatar">
+      <i class="bi bi-person-workspace fs-4"></i>
+    </div>
+    <div>
+      <h6 class="fw-700 mb-0">Personalized Mentor Advice</h6>
+      <small class="text-muted">From your AI Startup Mentor powered by IBM Granite</small>
+    </div>
+  </div>
+  <div class="mentor-advice-body mt-3">{{ s.MENTOR_ADVICE or '—' }}</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Prose renderer ──────────────────────────────────────────────
+document.querySelectorAll('.report-prose, .pitch-content, .mentor-advice-body').forEach(function(el) {
+  var raw = el.textContent || '';
+  if (!raw.trim()) return;
+
+  var text = raw;
+  // Section-level headings: "Phase N" / "Week N"
+  text = text.replace(/^(Phase\s+\d+[^:\n]*):?/gm,
+    '<h6 class="prose-phase-heading mt-4 mb-2">$1</h6>');
+  text = text.replace(/^(Week\s+\d+[^:\n]*):?/gm,
+    '<strong class="prose-week-heading d-block mt-3 mb-1">$1</strong>');
+  // Inline bold
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Bullet points  –  •  *
+  text = text.replace(/^[ \t]*[-•*]\s+(.+)$/gm, '<li class="mb-1">$1</li>');
+  // Numbered list
+  text = text.replace(/^[ \t]*(\d+)\.\s+(.+)$/gm,
+    '<li class="mb-1"><span class="prose-num me-1">$1.</span>$2</li>');
+  // Wrap consecutive <li> in <ul>
+  text = text.replace(/(<li[\s\S]*?<\/li>\n?)+/g, function(m) {
+    return '<ul class="report-list mb-2">' + m + '</ul>';
+  });
+  // Paragraph breaks (2+ newlines become paragraph tags)
+  var paras = text.split(/\n{2,}/);
+  text = paras.map(function(p) {
+    p = p.trim();
+    if (!p) return '';
+    // Already a block element — don't wrap
+    if (/^<(h[1-6]|ul|ol|li|strong class="prose)/.test(p)) return p;
+    return '<p class="mb-2">' + p.replace(/\n/g, ' ') + '</p>';
+  }).join('');
+
+  el.innerHTML = text;
+});
+
+// ── Sticky TOC active link highlight ───────────────────────────
+(function() {
+  var sections = document.querySelectorAll('[id^="sec-"]');
+  var links    = document.querySelectorAll('.toc-link');
+  if (!sections.length || !links.length) return;
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        links.forEach(function(l) {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(function(s) { observer.observe(s); });
+}());
+</script>
+{% endblock %}

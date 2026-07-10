@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}AI Startup Mentor – Submit Idea{% endblock %}
+{% block page_title %}AI Startup Mentor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9 col-lg-10">
+
+    <!-- Header -->
+    <div class="mentor-form-header glass p-4 mb-4">
+      <div class="d-flex align-items-center gap-4">
+        <div class="mentor-header-icon">
+          <i class="bi bi-stars fs-1"></i>
+        </div>
+        <div>
+          <h4 class="fw-700 mb-1">AI Startup Mentor</h4>
+          <p class="text-muted mb-0">
+            Submit your startup idea and receive a complete <strong>24-section incubation report</strong>
+            powered by <span class="text-primary fw-600">IBM Granite</span>. Every insight is saved and
+            available to revisit anytime.
+          </p>
+        </div>
+      </div>
+      <!-- Report section badges -->
+      <div class="mentor-badges mt-3 d-flex flex-wrap gap-2">
+        {% for label in [
+          'Validation Score','Executive Summary','Problem Analysis','Solution',
+          'Customer Personas','Market Research','Competitor Analysis','SWOT',
+          'Business Model Canvas','Revenue Model','Pricing Strategy','Budget',
+          'Funding','Gov. Schemes','Legal Checklist','Tech Stack',
+          'Roadmap','Weekly Plan','Marketing','Customer Acquisition',
+          'Investor Pitch','Risk Analysis','KPIs','Mentor Advice'
+        ] %}
+        <span class="badge mentor-section-badge">{{ label }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{ url_for('mentor.generate') }}" id="mentorForm" novalidate>
+
+      <!-- Section 1 -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">1</span> Basic Information
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="startup_name">Startup Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="startup_name" name="startup_name"
+                   placeholder="e.g. HealthBridge AI"
+                   value="{{ form_data.get('startup_name', '') }}" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="founder_name">Founder Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="founder_name" name="founder_name"
+                   placeholder="e.g. Jane Smith"
+                   value="{{ form_data.get('founder_name', '') }}" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="country">Country <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="country" name="country" required>
+              <option value="">Select your country…</option>
+              {% for c in countries %}
+              <option value="{{ c }}" {{ 'selected' if form_data.get('country') == c }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="industry">Industry <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="industry" name="industry" required>
+              <option value="">Select an industry…</option>
+              {% for ind in industries %}
+              <option value="{{ ind }}" {{ 'selected' if form_data.get('industry') == ind }}>{{ ind }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">2</span> Business Details
+        </h6>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label" for="budget">Budget Range <span class="text-danger">*</span></label>
+            <select class="form-select glass-input" id="budget" name="budget" required>
+              <option value="">Select your budget…</option>
+              {% for b in budgets %}
+              <option value="{{ b }}" {{ 'selected' if form_data.get('budget') == b }}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="target_audience">Target Audience <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="target_audience" name="target_audience"
+                   placeholder="e.g. Small business owners aged 30-50"
+                   value="{{ form_data.get('target_audience', '') }}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="business_goal">Business Goal <span class="text-danger">*</span></label>
+            <input type="text" class="form-control glass-input" id="business_goal" name="business_goal"
+                   placeholder="e.g. Become the leading AI health monitoring platform in Southeast Asia by 2027"
+                   value="{{ form_data.get('business_goal', '') }}" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="form-section glass p-4 mb-4">
+        <h6 class="form-section-title mb-4">
+          <span class="section-number">3</span> Idea Description
+        </h6>
+        <label class="form-label" for="idea_description">
+          Describe Your Startup Idea in Detail <span class="text-danger">*</span>
+        </label>
+        <textarea class="form-control glass-input" id="idea_description" name="idea_description"
+                  rows="7"
+                  placeholder="Explain your startup idea clearly. Include the problem you're solving, your proposed solution, unique value proposition, target market, and how it works. The more detail you provide, the better your incubation report will be."
+                  required>{{ form_data.get('idea_description', '') }}</textarea>
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted">Provide at least 150 characters for a high-quality report.</small>
+          <small class="text-muted" id="charCount">0 / 3000</small>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="d-flex gap-3 justify-content-end mb-5">
+        <a href="{{ url_for('mentor.history') }}" class="btn btn-outline-secondary px-4">
+          <i class="bi bi-journal-richtext me-1"></i>View Saved Reports
+        </a>
+        <button type="submit" class="btn btn-mentor px-5" id="submitBtn">
+          <i class="bi bi-stars me-2"></i>Generate Incubation Report
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const textarea = document.getElementById('idea_description');
+const counter  = document.getElementById('charCount');
+function updateCount() {
+  const len = textarea.value.length;
+  counter.textContent = len + ' / 3000';
+  counter.classList.toggle('text-warning', len > 2700);
+}
+textarea.addEventListener('input', updateCount);
+updateCount();
+
+document.getElementById('mentorForm').addEventListener('submit', function () {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating…';
+  document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('loadingText').textContent = 'IBM Granite is generating your full incubation report…';
+});
+</script>
+{% endblock %}

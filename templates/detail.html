@@ -1,91 +1,277 @@
 {% extends "base.html" %}
 
-{% block title %}{{ startup.startup_name }} – Analysis{% endblock %}
-{% block page_title %}Startup Analysis{% endblock %}
+{% block title %}{{ startup.startup_name }} – Workspace{% endblock %}
+{% block page_title %}Startup Workspace{% endblock %}
 
 {% block content %}
+
 <!-- ============================================================ -->
-<!-- Startup Header                                                -->
+<!-- Workspace Header                                              -->
 <!-- ============================================================ -->
-<div class="row g-4 mb-4">
-  <div class="col-12">
-    <div class="detail-header glass p-4">
-      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-4">
-          <div class="detail-icon">
-            <i class="bi {{ startup.icon }} fs-2"></i>
-          </div>
-          <div>
-            <h3 class="fw-700 mb-1">{{ startup.startup_name }}</h3>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-              <span class="badge bg-primary-soft text-primary">{{ startup.industry }}</span>
-              <span class="badge bg-secondary-soft text-secondary">
-                <i class="bi bi-geo-alt-fill me-1"></i>{{ startup.country }}
-              </span>
-              <span class="badge badge-status-{{ startup.status }}">{{ startup.status | title }}</span>
-              <small class="text-muted ms-1"><i class="bi bi-calendar3 me-1"></i>{{ startup.created_at_fmt }}</small>
-            </div>
-          </div>
+<div class="workspace-header glass mb-4">
+  <div class="workspace-header-inner">
+
+    <!-- Identity -->
+    <div class="d-flex align-items-center gap-3 min-w-0">
+      <div class="workspace-icon">
+        <i class="bi {{ startup.icon }} fs-2"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+          <span class="badge bg-primary-soft text-primary">{{ startup.industry }}</span>
+          <span class="badge bg-secondary-soft text-secondary">
+            <i class="bi bi-geo-alt-fill me-1"></i>{{ startup.country }}
+          </span>
+          <span class="badge badge-status-{{ startup.status }}">{{ startup.status | title }}</span>
         </div>
-        <div class="d-flex gap-2">
-          <a href="{{ url_for('chat.index', project_id=startup.id) }}" class="btn btn-outline-info btn-sm">
-            <i class="bi bi-chat-dots-fill me-1"></i>Chat About This
-          </a>
-          <form method="POST" action="{{ url_for('startup.reanalyze', project_id=startup.id) }}">
-            <button type="submit" class="btn btn-outline-primary btn-sm" onclick="showLoading('Re-analyzing with IBM Granite…')">
-              <i class="bi bi-arrow-clockwise me-1"></i>Re-Analyze
-            </button>
-          </form>
-          <form method="POST" action="{{ url_for('startup.delete', project_id=startup.id) }}"
-                onsubmit="return confirm('Delete this startup and all its data?');">
-            <button type="submit" class="btn btn-outline-danger btn-sm">
-              <i class="bi bi-trash3-fill me-1"></i>Delete
-            </button>
-          </form>
-        </div>
+        <h3 class="fw-700 mb-0 workspace-title">{{ startup.startup_name }}</h3>
+        <small class="text-muted">
+          <i class="bi bi-person-fill me-1"></i>{{ startup.founder_name }}
+          <span class="mx-2 opacity-50">·</span>
+          <i class="bi bi-calendar3 me-1"></i>{{ startup.created_at_fmt }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="workspace-toolbar">
+
+      <!-- Generate AI Startup Analysis -->
+      <form method="POST" action="{{ url_for('startup.generate_analysis', project_id=startup.id) }}" class="d-inline">
+        <button type="submit"
+                class="btn {% if report %}btn-outline-primary{% else %}btn-primary{% endif %} btn-sm workspace-action-btn"
+                onclick="showLoading('IBM Granite is analysing your startup…')">
+          <i class="bi bi-cpu-fill me-1"></i>
+          {% if report %}Regenerate Analysis{% else %}Generate Analysis{% endif %}
+        </button>
+      </form>
+
+      <!-- Generate AI Incubation Report -->
+      <form method="POST" action="{{ url_for('startup.generate_incubation', project_id=startup.id) }}" class="d-inline">
+        <button type="submit"
+                class="btn {% if incubation_report %}btn-outline-secondary{% else %}btn-secondary{% endif %} btn-sm workspace-action-btn"
+                onclick="showLoading('IBM Granite is generating your incubation report…')">
+          <i class="bi bi-stars me-1"></i>
+          {% if incubation_report %}Regenerate Incubation{% else %}Generate Incubation Report{% endif %}
+        </button>
+      </form>
+
+      <!-- Chat -->
+      <a href="{{ url_for('chat.index', project_id=startup.id) }}"
+         class="btn btn-outline-info btn-sm workspace-action-btn">
+        <i class="bi bi-chat-dots-fill me-1"></i>Chat
+      </a>
+
+      <!-- Export Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-outline-success btn-sm workspace-action-btn dropdown-toggle"
+                type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-download me-1"></i>Export
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end glass">
+          <li>
+            <a class="dropdown-item" href="{{ url_for('startup.export_pdf', project_id=startup.id) }}">
+              <i class="bi bi-file-pdf-fill me-2 text-danger"></i>Export Analysis as PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('startup.export_docx', project_id=startup.id) }}">
+              <i class="bi bi-file-word-fill me-2 text-primary"></i>Export Analysis as DOCX
+            </a>
+          </li>
+          {% if incubation_report %}
+          <li><hr class="dropdown-divider" style="border-color:var(--glass-border)"></li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('mentor.export_pdf', report_id=incubation_report.id) }}">
+              <i class="bi bi-file-pdf-fill me-2 text-danger"></i>Export Incubation as PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('mentor.export_docx', report_id=incubation_report.id) }}">
+              <i class="bi bi-file-word-fill me-2 text-primary"></i>Export Incubation as DOCX
+            </a>
+          </li>
+          {% endif %}
+        </ul>
       </div>
 
-      <!-- Startup Meta Row -->
-      <div class="row g-3 mt-3">
-        <div class="col-sm-4 col-lg-2">
-          <div class="meta-item">
-            <small class="text-muted d-block">Founder</small>
-            <span class="fw-500">{{ startup.founder_name }}</span>
-          </div>
-        </div>
-        <div class="col-sm-4 col-lg-2">
-          <div class="meta-item">
-            <small class="text-muted d-block">Budget</small>
-            <span class="fw-500">{{ startup.budget }}</span>
-          </div>
-        </div>
-        <div class="col-sm-4 col-lg-4">
-          <div class="meta-item">
-            <small class="text-muted d-block">Target Audience</small>
-            <span class="fw-500">{{ startup.target_audience }}</span>
-          </div>
-        </div>
-        <div class="col-12 col-lg-4">
-          <div class="meta-item">
-            <small class="text-muted d-block">Business Goal</small>
-            <span class="fw-500">{{ startup.business_goal }}</span>
-          </div>
-        </div>
+      <!-- More: Edit / Progress / Delete -->
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm workspace-action-btn dropdown-toggle"
+                type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end glass">
+          <li>
+            <a class="dropdown-item" href="{{ url_for('startup.edit', project_id=startup.id) }}">
+              <i class="bi bi-pencil-fill me-2 text-warning"></i>Edit Startup
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('progress.detail', project_id=startup.id) }}">
+              <i class="bi bi-check2-square me-2 text-info"></i>Progress Tracker
+            </a>
+          </li>
+          <li><hr class="dropdown-divider" style="border-color:var(--glass-border)"></li>
+          <li>
+            <form method="POST" action="{{ url_for('startup.delete', project_id=startup.id) }}"
+                  onsubmit="return confirm('Delete this startup and all its data? This cannot be undone.');">
+              <button type="submit" class="dropdown-item text-danger">
+                <i class="bi bi-trash3-fill me-2"></i>Delete Startup
+              </button>
+            </form>
+          </li>
+        </ul>
       </div>
+
+    </div><!-- /workspace-toolbar -->
+  </div><!-- /workspace-header-inner -->
+
+  <!-- Meta row -->
+  <div class="workspace-meta-row">
+    <div class="workspace-meta-item">
+      <span class="workspace-meta-label">Budget</span>
+      <span class="workspace-meta-value">{{ startup.budget }}</span>
+    </div>
+    <div class="workspace-meta-item">
+      <span class="workspace-meta-label">Target Audience</span>
+      <span class="workspace-meta-value">{{ startup.target_audience }}</span>
+    </div>
+    <div class="workspace-meta-item workspace-meta-goal">
+      <span class="workspace-meta-label">Business Goal</span>
+      <span class="workspace-meta-value">{{ startup.business_goal }}</span>
     </div>
   </div>
 </div>
 
-{% if report %}
 <!-- ============================================================ -->
-<!-- Score Cards                                                   -->
+<!-- Status Cards Row                                              -->
 <!-- ============================================================ -->
 <div class="row g-3 mb-4">
+
+  <!-- AI Analysis Status -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="workspace-status-card glass p-3">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-cpu-fill text-primary"></i>
+        <span class="workspace-status-title">AI Analysis</span>
+      </div>
+      {% if report %}
+      <div class="workspace-status-value text-success">
+        <i class="bi bi-check-circle-fill me-1"></i>Generated
+      </div>
+      <small class="text-muted">
+        Viability: <strong class="text-{{ report.viability_color }}">{{ report.viability_score }}/100</strong>
+      </small>
+      {% else %}
+      <div class="workspace-status-value text-muted">
+        <i class="bi bi-circle-dotted me-1"></i>Not Generated
+      </div>
+      <small class="text-muted">Click Generate Analysis</small>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Incubation Report Status -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="workspace-status-card glass p-3">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-stars text-secondary"></i>
+        <span class="workspace-status-title">Incubation Report</span>
+      </div>
+      {% if incubation_report %}
+      <div class="workspace-status-value text-success">
+        <i class="bi bi-check-circle-fill me-1"></i>Generated
+      </div>
+      <small class="text-muted">
+        Validation: <strong class="text-primary">{{ incubation_report.validation_score }}/100</strong>
+      </small>
+      {% else %}
+      <div class="workspace-status-value text-muted">
+        <i class="bi bi-circle-dotted me-1"></i>Not Generated
+      </div>
+      <small class="text-muted">Click Generate Incubation Report</small>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- AI Chat -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="workspace-status-card glass p-3">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-chat-dots-fill text-info"></i>
+        <span class="workspace-status-title">AI Mentor Chat</span>
+      </div>
+      <div class="workspace-status-value text-info">
+        <i class="bi bi-circle-fill me-1" style="font-size:0.45rem;vertical-align:middle"></i>Available
+      </div>
+      <small class="text-muted">
+        <a href="{{ url_for('chat.index', project_id=startup.id) }}" class="text-info">Open chat →</a>
+      </small>
+    </div>
+  </div>
+
+  <!-- Stage -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="workspace-status-card glass p-3">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-rocket-takeoff-fill text-warning"></i>
+        <span class="workspace-status-title">Stage</span>
+      </div>
+      <div class="workspace-status-value text-warning">{{ (startup.stage or 'idea') | title }}</div>
+      <small class="text-muted">
+        <a href="{{ url_for('progress.detail', project_id=startup.id) }}" class="text-warning">Track progress →</a>
+      </small>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- Empty State (nothing generated yet)                          -->
+<!-- ============================================================ -->
+{% if not report and not incubation_report %}
+<div class="workspace-empty-state glass p-5 text-center mb-4">
+  <div class="empty-state-icon mb-3">
+    <i class="bi bi-rocket-takeoff fs-1 text-primary"></i>
+  </div>
+  <h5 class="fw-700 mb-2">Your workspace is ready</h5>
+  <p class="text-muted mb-4 mx-auto" style="max-width:480px">
+    All startup details are saved. Use the buttons above to generate AI-powered reports
+    without entering any information again.
+  </p>
+  <div class="d-flex gap-3 justify-content-center flex-wrap">
+    <form method="POST" action="{{ url_for('startup.generate_analysis', project_id=startup.id) }}">
+      <button type="submit" class="btn btn-primary px-4"
+              onclick="showLoading('IBM Granite is analysing your startup…')">
+        <i class="bi bi-cpu-fill me-2"></i>Generate AI Analysis
+      </button>
+    </form>
+    <form method="POST" action="{{ url_for('startup.generate_incubation', project_id=startup.id) }}">
+      <button type="submit" class="btn btn-secondary px-4"
+              onclick="showLoading('IBM Granite is generating your incubation report…')">
+        <i class="bi bi-stars me-2"></i>Generate Incubation Report
+      </button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- ============================================================ -->
+<!-- AI Startup Analysis                                          -->
+<!-- ============================================================ -->
+{% if report %}
+<div class="workspace-section-label mb-3">
+  <i class="bi bi-cpu-fill me-2 text-primary"></i>AI Startup Analysis
+</div>
+
+<!-- Score Cards -->
+<div class="row g-3 mb-4">
   {% for score_key, label, icon in [
-    ('viability_score', 'Viability',  'bi-shield-check'),
-    ('market_score',    'Market Fit', 'bi-graph-up-arrow'),
-    ('innovation_score','Innovation', 'bi-lightbulb-fill'),
-    ('execution_score', 'Execution',  'bi-lightning-charge-fill'),
+    ('viability_score',  'Viability',  'bi-shield-check'),
+    ('market_score',     'Market Fit', 'bi-graph-up-arrow'),
+    ('innovation_score', 'Innovation', 'bi-lightbulb-fill'),
+    ('execution_score',  'Execution',  'bi-lightning-charge-fill'),
   ] %}
   {% set score = report[score_key] %}
   {% set color = report[score_key[:-6] + '_color'] %}
@@ -97,15 +283,15 @@
         <span class="score-number">{{ score }}</span>
       </div>
       <div class="fw-600">{{ label }}</div>
-      <small class="badge bg-{{ color }}-soft text-{{ color }}">{{ report[score_key[:-6] + '_label'] }}</small>
+      <small class="badge bg-{{ color }}-soft text-{{ color }}">
+        {{ report[score_key[:-6] + '_label'] }}
+      </small>
     </div>
   </div>
   {% endfor %}
 </div>
 
-<!-- ============================================================ -->
-<!-- Score Radar Chart + Report                                    -->
-<!-- ============================================================ -->
+<!-- Radar + Full Report -->
 <div class="row g-4 mb-4">
   <div class="col-lg-4">
     <div class="card-glass glass p-4 h-100">
@@ -129,25 +315,72 @@
     </div>
   </div>
 </div>
+{% endif %}
 
-{% else %}
-<!-- No report yet -->
-<div class="card-glass glass p-5 text-center">
-  <i class="bi bi-cpu fs-1 text-muted mb-3 d-block"></i>
-  <h5 class="fw-600 mb-2">No Analysis Report Yet</h5>
-  <p class="text-muted mb-4">Run the AI analysis to receive a full business report from IBM Granite.</p>
-  <form method="POST" action="{{ url_for('startup.reanalyze', project_id=startup.id) }}">
-    <button type="submit" class="btn btn-primary px-5" onclick="showLoading('IBM Granite is analyzing your startup…')">
-      <i class="bi bi-cpu-fill me-2"></i>Run AI Analysis
-    </button>
-  </form>
+<!-- ============================================================ -->
+<!-- AI Incubation Report Preview                                 -->
+<!-- ============================================================ -->
+{% if incubation_report %}
+{% set s = incubation_report.sections %}
+{% set vs = incubation_report.validation_score %}
+<div class="workspace-section-label mb-3 mt-2">
+  <i class="bi bi-stars me-2 text-secondary"></i>AI Incubation Report
+  <a href="{{ url_for('mentor.view_report', report_id=incubation_report.id) }}"
+     class="ms-auto btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:0.75rem">
+    View Full Report <i class="bi bi-arrow-right ms-1"></i>
+  </a>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Validation Score -->
+  <div class="col-lg-3">
+    <div class="glass p-4 h-100 text-center d-flex flex-column align-items-center justify-content-center">
+      <i class="bi bi-patch-check-fill fs-3 text-primary mb-2"></i>
+      <h6 class="fw-600 text-muted mb-3 text-uppercase ls-wide" style="font-size:0.7rem">
+        Validation Score
+      </h6>
+      {% set vs_color = 'success' if vs >= 75 else ('info' if vs >= 55 else ('warning' if vs >= 40 else 'danger')) %}
+      {% set vs_hex   = '#10b981' if vs >= 75 else ('#06b6d4' if vs >= 55 else ('#f59e0b' if vs >= 40 else '#ef4444')) %}
+      <div class="validation-score-ring mx-auto" style="--vs:{{ vs }};--vs-hex:{{ vs_hex }}">
+        <span class="vs-number">{{ vs }}</span>
+        <span class="vs-label-text">/100</span>
+      </div>
+      <span class="badge bg-{{ vs_color }}-soft text-{{ vs_color }} mt-3 px-3 py-2" style="font-size:0.82rem">
+        {{ 'Excellent' if vs >= 75 else ('Good' if vs >= 55 else ('Fair' if vs >= 40 else 'Needs Work')) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="col-lg-9">
+    <div class="glass p-4 h-100 d-flex flex-column">
+      <h6 class="section-heading mb-3">
+        <i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Executive Summary
+      </h6>
+      <div class="report-prose flex-grow-1">
+        {{ s.EXECUTIVE_SUMMARY or 'No summary generated.' }}
+      </div>
+      <div class="d-flex gap-2 mt-3 pt-3" style="border-top:1px solid var(--glass-border)">
+        <a href="{{ url_for('mentor.view_report', report_id=incubation_report.id) }}"
+           class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-journal-richtext me-1"></i>View Full 24-Section Report
+        </a>
+        <a href="{{ url_for('mentor.export_pdf', report_id=incubation_report.id) }}"
+           class="btn btn-outline-danger btn-sm">
+          <i class="bi bi-file-pdf-fill me-1"></i>Export PDF
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
 {% endif %}
 
-<!-- Idea Description -->
-<div class="card-glass glass p-4 mt-4">
+<!-- ============================================================ -->
+<!-- Startup Idea Description                                     -->
+<!-- ============================================================ -->
+<div class="card-glass glass p-4 mt-2">
   <h6 class="section-heading mb-3">
-    <i class="bi bi-journal-text me-2 text-primary"></i>Original Idea Description
+    <i class="bi bi-journal-text me-2 text-primary"></i>Startup Idea Description
   </h6>
   <p class="text-muted mb-0" style="line-height:1.8">{{ startup.idea_description }}</p>
 </div>
@@ -155,30 +388,27 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if report %}
 <script>
-// Render markdown-like content in the report body
-(function() {
+{% if report %}
+// ── Markdown rendering ───────────────────────────────────────────
+(function () {
   const el = document.getElementById('reportContent');
+  if (!el) return;
   let html = el.textContent;
-  // Convert ## headings
-  html = html.replace(/^## (.+)$/gm, '<h5 class="report-heading mt-4 mb-2">$1</h5>');
+  html = html.replace(/^## (.+)$/gm,  '<h5 class="report-heading mt-4 mb-2">$1</h5>');
   html = html.replace(/^### (.+)$/gm, '<h6 class="report-subheading mt-3 mb-1">$1</h6>');
-  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  // Bullets
   html = html.replace(/^\s*[-*] (.+)$/gm, '<li class="mb-1">$1</li>');
   html = html.replace(/(<li[^>]*>.*<\/li>)/gs, '<ul class="report-list">$1</ul>');
-  // Paragraphs
   html = html.replace(/\n{2,}/g, '</p><p class="mb-2">');
   el.innerHTML = '<p class="mb-2">' + html + '</p>';
 }());
 
-// Radar chart
+// ── Radar Chart ──────────────────────────────────────────────────
 new Chart(document.getElementById('radarChart'), {
   type: 'radar',
   data: {
-    labels: ['Viability','Market Fit','Innovation','Execution'],
+    labels: ['Viability', 'Market Fit', 'Innovation', 'Execution'],
     datasets: [{
       label: '{{ startup.startup_name | replace("'", "\\'") }}',
       data: [
@@ -207,11 +437,11 @@ new Chart(document.getElementById('radarChart'), {
     maintainAspectRatio: false,
   },
 });
+{% endif %}
 
 function showLoading(msg) {
   document.getElementById('loadingText').textContent = msg;
   document.getElementById('loadingOverlay').classList.add('active');
 }
 </script>
-{% endif %}
 {% endblock %}

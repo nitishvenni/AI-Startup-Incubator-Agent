@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Log{% endblock %}
+{% block page_title %}Activity Log{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-700 mb-1">Recent Activity</h4>
+    <p class="text-muted mb-0 small">{{ activity | length }} recent events</p>
+  </div>
+</div>
+
+{% if activity %}
+<div class="card-glass glass p-4">
+  <div class="activity-feed-full">
+    {% for a in activity %}
+    <div class="activity-item-full d-flex gap-3 align-items-start p-3 glass-item rounded mb-2">
+      <div class="activity-icon-badge flex-shrink-0
+           {% if 'created' in a.event_type %}bg-success-soft text-success
+           {% elif 'deleted' in a.event_type %}bg-danger-soft text-danger
+           {% elif 'generated' in a.event_type %}bg-primary-soft text-primary
+           {% elif 'export' in a.event_type %}bg-info-soft text-info
+           {% elif 'edited' in a.event_type %}bg-warning-soft text-warning
+           {% else %}bg-secondary-soft text-secondary{% endif %}">
+        <i class="bi
+           {% if 'created' in a.event_type %}bi-plus-circle-fill
+           {% elif 'deleted' in a.event_type %}bi-trash3-fill
+           {% elif 'generated' in a.event_type %}bi-cpu-fill
+           {% elif 'export' in a.event_type %}bi-download
+           {% elif 'edited' in a.event_type %}bi-pencil-fill
+           {% elif 'profile' in a.event_type %}bi-person-fill
+           {% elif 'milestone' in a.event_type %}bi-check2-square
+           {% elif 'chat' in a.event_type %}bi-chat-dots-fill
+           {% else %}bi-activity{% endif %}"></i>
+      </div>
+      <div class="flex-grow-1 min-w-0">
+        <div class="fw-600 mb-1">{{ a.description }}</div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <span class="tag-pill small">{{ a.event_type | replace('_', ' ') | title }}</span>
+          {% if a.startup_name %}
+          <a href="{{ url_for('startup.detail', project_id=a.project_id) }}"
+             class="tag-pill small text-primary text-decoration-none">
+            <i class="bi bi-rocket-takeoff me-1"></i>{{ a.startup_name }}
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="text-end flex-shrink-0">
+        <small class="text-muted">{{ a.created_at_fmt }}</small>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="empty-state-full glass p-5 text-center">
+  <i class="bi bi-activity fs-1 text-muted mb-3 d-block"></i>
+  <h5 class="fw-600 mb-2">No Activity Yet</h5>
+  <p class="text-muted mb-0">Your activity will appear here as you use the platform.</p>
+</div>
+{% endif %}
+{% endblock %}

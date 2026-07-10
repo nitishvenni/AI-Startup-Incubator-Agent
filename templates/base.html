@@ -36,35 +36,49 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">MAIN</div>
     <a href="{{ url_for('main.dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'main.dashboard' }}">
-      <i class="bi bi-grid-1x2-fill"></i>
-      <span>Dashboard</span>
+      <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
     </a>
     <a href="{{ url_for('startup.create') }}" class="nav-link {{ 'active' if request.endpoint == 'startup.create' }}">
-      <i class="bi bi-plus-circle-fill"></i>
-      <span>New Startup</span>
+      <i class="bi bi-plus-circle-fill"></i><span>New Startup</span>
     </a>
 
     <div class="nav-section-label mt-3">ANALYSIS</div>
     <a href="{{ url_for('main.history') }}" class="nav-link {{ 'active' if request.endpoint == 'main.history' }}">
-      <i class="bi bi-clock-history"></i>
-      <span>Project History</span>
+      <i class="bi bi-clock-history"></i><span>Project History</span>
+    </a>
+    <a href="{{ url_for('analytics.index') }}" class="nav-link {{ 'active' if request.endpoint == 'analytics.index' }}">
+      <i class="bi bi-bar-chart-line-fill"></i><span>Analytics</span>
+    </a>
+    <a href="{{ url_for('progress.index') }}" class="nav-link {{ 'active' if request.endpoint in ('progress.index','progress.detail') }}">
+      <i class="bi bi-check2-square"></i><span>Progress Tracker</span>
     </a>
     <a href="{{ url_for('chat.index') }}" class="nav-link {{ 'active' if request.endpoint in ('chat.index',) }}">
-      <i class="bi bi-chat-dots-fill"></i>
-      <span>AI Mentor Chat</span>
+      <i class="bi bi-chat-dots-fill"></i><span>AI Mentor Chat</span>
+    </a>
+
+    <div class="nav-section-label mt-3">MENTOR</div>
+    <a href="{{ url_for('mentor.index') }}" class="nav-link {{ 'active' if request.endpoint == 'mentor.index' }}">
+      <i class="bi bi-stars"></i><span>AI Mentor Report</span>
+    </a>
+    <a href="{{ url_for('mentor.history') }}" class="nav-link {{ 'active' if request.endpoint == 'mentor.history' }}">
+      <i class="bi bi-journal-richtext"></i><span>Saved Reports</span>
     </a>
 
     <div class="nav-section-label mt-3">SYSTEM</div>
+    <a href="{{ url_for('main.activity') }}" class="nav-link {{ 'active' if request.endpoint == 'main.activity' }}">
+      <i class="bi bi-activity"></i><span>Activity Log</span>
+    </a>
+    <a href="{{ url_for('profile.index') }}" class="nav-link {{ 'active' if request.endpoint == 'profile.index' }}">
+      <i class="bi bi-person-circle"></i><span>Profile</span>
+    </a>
     <a href="{{ url_for('settings.index') }}" class="nav-link {{ 'active' if request.endpoint == 'settings.index' }}">
-      <i class="bi bi-gear-fill"></i>
-      <span>Settings</span>
+      <i class="bi bi-gear-fill"></i><span>Settings</span>
     </a>
   </nav>
 
   <div class="sidebar-footer">
     <div class="ibm-badge">
-      <i class="bi bi-cpu-fill me-1"></i>
-      IBM Granite
+      <i class="bi bi-cpu-fill me-1"></i>IBM Granite
     </div>
   </div>
 </div>
@@ -79,22 +93,36 @@
     <button class="btn btn-icon sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
       <i class="bi bi-list fs-5"></i>
     </button>
-    <div class="topbar-title">
+    <div class="topbar-title d-none d-md-block">
       {% block page_title %}Dashboard{% endblock %}
     </div>
-    <div class="topbar-actions ms-auto d-flex align-items-center gap-3">
-      <a href="{{ url_for('startup.create') }}" class="btn btn-primary btn-sm px-3">
-        <i class="bi bi-plus-lg me-1"></i> New Startup
+
+    <!-- Global search -->
+    <div class="topbar-search mx-auto d-none d-lg-flex">
+      <div class="search-wrap position-relative">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="form-control glass-input search-input" id="globalSearch"
+               placeholder="Search startups…" autocomplete="off" />
+        <div class="search-results glass" id="searchResults"></div>
+      </div>
+    </div>
+
+    <div class="topbar-actions ms-auto d-flex align-items-center gap-2">
+      <a href="{{ url_for('main.activity') }}" class="btn btn-icon position-relative" title="Activity">
+        <i class="bi bi-bell fs-5"></i>
+      </a>
+      <a href="{{ url_for('startup.create') }}" class="btn btn-primary btn-sm px-3 d-none d-md-flex align-items-center gap-1">
+        <i class="bi bi-plus-lg"></i><span>New Startup</span>
       </a>
     </div>
   </header>
 
   <!-- Flash messages -->
-  <div class="flash-container px-4 pt-3">
+  <div class="flash-container px-4 pt-3" id="flashContainer">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          <div class="alert alert-{{ category }} alert-dismissible fade show flash-alert" role="alert">
             <i class="bi bi-{{ 'check-circle' if category == 'success' else ('exclamation-triangle' if category == 'warning' else ('info-circle' if category == 'info' else 'x-circle')) }}-fill me-2"></i>
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -112,13 +140,18 @@
 </div><!-- /.main-wrapper -->
 
 <!-- ============================================================ -->
+<!-- Toast Notification Container                                 -->
+<!-- ============================================================ -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:9999"></div>
+
+<!-- ============================================================ -->
 <!-- Global Loading Overlay                                       -->
 <!-- ============================================================ -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-card glass">
     <div class="spinner-ring"></div>
     <p class="loading-text mt-3 mb-0" id="loadingText">Analyzing with IBM Granite…</p>
-    <small class="text-muted">This may take a few seconds</small>
+    <small class="text-muted">This may take 15-60 seconds</small>
   </div>
 </div>
 

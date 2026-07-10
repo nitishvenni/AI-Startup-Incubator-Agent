@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Progress Tracker{% endblock %}
+{% block page_title %}Progress Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-700 mb-1">Startup Progress Tracker</h4>
+    <p class="text-muted mb-0 small">Track milestones for each startup project.</p>
+  </div>
+  <a href="{{ url_for('startup.create') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>New Startup
+  </a>
+</div>
+
+{% if startups %}
+<div class="row g-4">
+  {% for s in startups %}
+  <div class="col-md-6 col-xl-4">
+    <a href="{{ url_for('progress.detail', project_id=s.id) }}" class="text-decoration-none">
+      <div class="project-card glass h-100 p-4 hover-lift">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="startup-icon-md">
+              <i class="bi {{ s.icon }}"></i>
+            </div>
+            <div>
+              <h6 class="fw-700 mb-0 text-primary">{{ s.startup_name }}</h6>
+              <small class="text-muted">{{ s.industry }}</small>
+            </div>
+          </div>
+          <span class="badge badge-status-{{ s.status }}">{{ s.status | title }}</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-2">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="text-muted">Milestones</small>
+            <small class="fw-500">{{ s.progress.completed }}/{{ s.progress.total }}</small>
+          </div>
+          <div class="progress score-progress">
+            <div class="progress-bar bg-success"
+                 style="width:{{ s.progress.pct }}%"></div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap mt-3">
+          {% if s.progress.total == 0 %}
+          <span class="tag-pill"><i class="bi bi-plus me-1"></i>No milestones yet</span>
+          {% else %}
+          <span class="tag-pill text-success"><i class="bi bi-check-circle me-1"></i>{{ s.progress.completed }} done</span>
+          {% if s.progress.in_progress > 0 %}
+          <span class="tag-pill text-warning"><i class="bi bi-arrow-right-circle me-1"></i>{{ s.progress.in_progress }} active</span>
+          {% endif %}
+          {% if s.progress.pending > 0 %}
+          <span class="tag-pill text-muted"><i class="bi bi-circle me-1"></i>{{ s.progress.pending }} pending</span>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-full glass p-5 text-center">
+  <i class="bi bi-check2-square fs-1 text-muted mb-3 d-block"></i>
+  <h5 class="fw-600 mb-2">No Startup Projects Yet</h5>
+  <p class="text-muted mb-4">Create a startup to start tracking milestones.</p>
+  <a href="{{ url_for('startup.create') }}" class="btn btn-primary btn-lg px-5">
+    <i class="bi bi-plus-circle-fill me-2"></i>Create First Startup
+  </a>
+</div>
+{% endif %}
+{% endblock %}

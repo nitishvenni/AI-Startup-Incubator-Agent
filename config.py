@@ -9,7 +9,14 @@ import os
 from dotenv import load_dotenv
 
 # Load .env into the process environment before anything else reads it.
-load_dotenv()
+load_dotenv(override=True)
+
+print("=" * 50)
+print("ENV Loaded")
+print("IBM_API_KEY:", os.getenv("IBM_API_KEY")[:12] if os.getenv("IBM_API_KEY") else "NOT FOUND")
+print("IBM_PROJECT_ID:", os.getenv("IBM_PROJECT_ID"))
+print("IBM_URL:", os.getenv("IBM_URL"))
+print("=" * 50)
 
 
 class Config:
@@ -36,12 +43,18 @@ class Config:
     # ------------------------------------------------------------------ #
     # watsonx generation parameters (sensible defaults)                   #
     # ------------------------------------------------------------------ #
-    WX_MAX_NEW_TOKENS: int = 1024
-    WX_MIN_NEW_TOKENS: int = 50
-    WX_TEMPERATURE: float = 0.7
-    WX_TOP_P: float = 0.95
-    WX_TOP_K: int = 50
-    WX_REPETITION_PENALTY: float = 1.1
+    WX_MAX_NEW_TOKENS = 1024
+    WX_MIN_NEW_TOKENS = 1
+    WX_TEMPERATURE = 0.3
+    WX_TOP_P = 1.0
+    WX_TOP_K = 0
+    WX_REPETITION_PENALTY = 1.0
+
+    # ------------------------------------------------------------------ #
+    # Mentor incubation report parameters (richer output needs more tokens)#
+    # ------------------------------------------------------------------ #
+    MENTOR_MAX_NEW_TOKENS: int = 4096
+    MENTOR_TEMPERATURE: float = 0.75
 
 
 class DevelopmentConfig(Config):
@@ -60,3 +73,4 @@ config_by_name: dict = {
     "production": ProductionConfig,
     "default": DevelopmentConfig,
 }
+
